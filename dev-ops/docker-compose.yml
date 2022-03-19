@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: ticktackbumm_backend
+    restart: unless-stopped
+    volumes:
+      - ../backend:/usr/share/nginx/html/proj
+    ports:
+      - "8000:80"
+    networks:
+      - ticktackbumm
+
+  frontend:
+    build: ./frontend
+    container_name: ticktackbumm_frontend
+    restart: unless-stopped
+    volumes:
+      - ../frontend:/root/proj
+    ports:
+      - "4200:4200"
+    networks:
+      - ticktackbumm
+
+  mysql:
+    image: mysql:8.0.28-oracle
+    container_name: ticktackbumm_database
+    restart: unless-stopped
+    volumes:
+      - ticktackbumm_mysql_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=IchBinDasRootPasswortFuerDenContainer
+      - MYSQL_DATABASE=ticktackbumm
+      - PGID=0
+      - PUID=0
+    networks:
+      - ticktackbumm
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ticktackbumm_phpmyadmin
+    restart: unless-stopped
+    environment:
+      - PMA_HOST=ticktackbumm_database
+      - PMA_USER=root
+      - PMA_PASSWORD=IchBinDasRootPasswortFuerDenContainer
+    ports:
+      - "1337:80"
+    networks:
+      - ticktackbumm
+
+networks:
+  ticktackbumm:
+
+volumes:
+  ticktackbumm_mysql_data: {}
