@@ -27,9 +27,13 @@
 
       <div class="container--creation-box__right-container__password">
         <mat-checkbox formControlName="setPassword"></mat-checkbox>
-        <mat-form-field appearance="standard">
-          <mat-label>Willst Du ein Passwort setzen?</mat-label>
-          <input formControlName="passwordValue" matInput>
+        <mat-form-field appearance="standard" [class.form-disabled]="creationForm.get('setPassword').value === false">
+          <mat-label [class.form-disabled]="creationForm.get('setPassword').value === false">Willst Du ein Passwort setzen?</mat-label>
+          <input
+            formControlName="passwordValue"
+            matInput
+            [disabled]="creationForm.get('setPassword').value === false"
+          >
           <mat-icon matSuffix>fingerprint</mat-icon>
         </mat-form-field>
       </div>

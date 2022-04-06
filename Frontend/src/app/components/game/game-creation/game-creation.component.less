@@ -1,0 +1,36 @@
+:host {
+  .container {
+    width: 1200px;
+    height: 100%;
+    margin: auto;
+    display: grid;
+    align-items: center;
+
+    &--inner-container {
+      background-image: linear-gradient(to bottom right, #ffffff, #c2c2c2);
+      width: 900px;
+      height: 500px;
+      border-radius: 12px;
+      margin: auto;
+      display: grid;
+      grid-template-rows: 1fr;
+      grid-template-columns: 1fr 2fr;
+
+      &__settings {
+        h1 {
+          margin: 14px;
+        }
+      }
+
+      &__user-list {
+        border-right: solid 1px black;
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        h1 {
+          margin: 14px;
+        }
+      }
+    }
+  }
+}

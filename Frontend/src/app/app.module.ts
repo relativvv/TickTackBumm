@@ -13,12 +13,22 @@ import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {ReactiveFormsModule} from "@angular/forms";
+import { GameCreationComponent } from './components/game/game-creation/game-creation.component';
+import { GameComponent } from './components/game/game.component';
+import { UserListComponent } from './components/game/game-creation/user-list/user-list.component';
+import { UserItemComponent } from './components/game/game-creation/user-list/user-item/user-item.component';
+import { ChatComponent } from './components/game/game-creation/chat/chat.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    PlayingCardComponent
+    PlayingCardComponent,
+    GameCreationComponent,
+    GameComponent,
+    UserListComponent,
+    UserItemComponent,
+    ChatComponent
   ],
   imports: [
     BrowserModule,
