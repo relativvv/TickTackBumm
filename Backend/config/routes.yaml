@@ -1,0 +1,4 @@
+create_game:
+  path: /game
+  controller: App\Controller\GameController::createGame
+  methods: POST

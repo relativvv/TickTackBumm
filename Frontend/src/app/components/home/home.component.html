@@ -1,8 +1,8 @@
-<div *ngIf="creationForm" class="container">
+<div *ngIf="creationForm && !loading; else showLoading" id="main-container" class="container">
 
-  <h1>Tick-Tack-Bumm</h1>
+  <h1 [@fadeOut]="creationForm.get('valid').value">Tick-Tack-Bumm</h1>
 
-  <form [formGroup]="creationForm" class="container--creation-box">
+  <form [@fadeInOut] [@fadeOut]="creationForm.get('valid').value" [formGroup]="creationForm" class="container--creation-box">
     <div class="container--creation-box__left-container">
       <button
         type="button"
@@ -37,8 +37,9 @@
       <button
         class="container--creation-box__right-container__create-button"
         mat-raised-button
-        [disabled]="creationForm.invalid"
-        [class.disabled]="creationForm.invalid">
+        [disabled]="creationForm.invalid || !creationForm.get('valid').value"
+        [class.disabled]="creationForm.invalid || !creationForm.get('valid').value"
+        (click)="createGame()">
         <mat-icon>play_arrow</mat-icon>
         Spiel erstellen
       </button>
@@ -46,3 +47,9 @@
     </div>
   </form>
 </div>
+
+<ng-template #showLoading>
+  <div class="loading-container">
+    <mat-spinner color="warn"></mat-spinner>
+  </div>
+</ng-template>

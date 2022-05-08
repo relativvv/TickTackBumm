@@ -1,0 +1,6 @@
+<div class="container">
+  <img alt="profileImage" [src]="player.image" />
+  <h3 [class.creator]="player.creator">{{ player.userName }}</h3>
+  <mat-icon *ngIf="player.creator">star</mat-icon>
+</div>
+<ng-content></ng-content>

@@ -1,20 +1,46 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {Title} from "@angular/platform-browser";
+import {Game} from "../../../models/game.model";
+import {Player} from "../../../models/player.model";
+import {GameState} from "../../../enums/gamestate.enum";
+import {GameService} from "../../../services/game.service";
+import {Router} from "@angular/router";
+import {ToastrService} from "ngx-toastr";
+import {animate, state, style, transition, trigger} from "@angular/animations";
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.less']
+  styleUrls: ['./home.component.less'],
+  animations: [
+    trigger('fadeInOut', [
+      state('void', style({
+        top: 35,
+        opacity: 0
+      })),
+      transition('void <=> *', [animate(1000)])
+    ]),
+    trigger('fadeOut', [
+      state('false', style({
+        opacity: 0
+      })),
+      transition('* => false', [animate(1000)])
+    ]),
+  ],
 })
 export class HomeComponent implements OnInit {
 
   creationForm: FormGroup;
   imageSource: string;
+  loading: boolean;
 
   constructor(
     private readonly formBuilder: FormBuilder,
-    private readonly titleService: Title
+    private readonly titleService: Title,
+    private readonly gameService: GameService,
+    private readonly router: Router,
+    private readonly toastService: ToastrService
   ) {
     this.titleService.setTitle('Tick-Tack-Bumm | Startseite');
   }
@@ -53,11 +79,55 @@ export class HomeComponent implements OnInit {
     return profileImages[rnd];
   }
 
+  createGame(): void {
+    const creator: Player = {
+      userName: this.creationForm.get('username').value,
+      image: this.imageSource,
+      creator: true
+    };
+
+    const game: Game = {
+      id: null,
+      joinKey: null,
+      players: [creator],
+      gameState: GameState.LOBBY,
+      minPlayers: 3,
+      maxPlayers: 16,
+      minBombTime: 10,
+      maxBombTime: 50,
+      allowKnown: true,
+      allowAsked: true,
+      allowOriginal: true,
+      allowSetted: true,
+      allowShaked: true,
+    }
+
+    this.creationForm.get('valid').setValue(false);
+
+    setTimeout(() => {
+      this.loading = true;
+      this.gameService.createGame(game)
+        .subscribe({
+          next: (game: Game) => {
+            this.router.navigate(['/game', { key: game.joinKey }]);
+          },
+          error: () => {
+            this.loading = false;
+            this.toastService.error('Ein Fehler ist beim Erstellen des Spiels aufgetreten..')
+          },
+          complete: () => {
+            this.loading = false;
+          }
+        })
+    }, 1400)
+  }
+
   private createForm(): void {
     this.creationForm = this.formBuilder.group({
       username: ['', [Validators.required]],
       setPassword: [false],
-      passwordValue: [{value: '', disabled: true}]
+      passwordValue: [{value: '', disabled: true}],
+      valid: [true]
     });
 
     this.creationForm.get('setPassword')

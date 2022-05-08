@@ -1,0 +1,12 @@
+<ng-container *ngIf="game">
+  <ng-container [ngSwitch]="game.gameState">
+    <app-lobby
+      *ngSwitchCase="LOBBY"
+      [game]="game"
+    ></app-lobby>
+    <app-ingame
+      *ngSwitchCase="INGAME"
+      [game]="game"
+    ></app-ingame>
+  </ng-container>
+</ng-container>

@@ -14,6 +14,7 @@
 // hue. Available color palettes: https://material.io/design/color/
 $Frontend-primary: mat.define-palette(mat.$orange-palette, A700);
 $Frontend-accent: mat.define-palette(mat.$orange-palette, 900, A100, A400);
+$Frontend-special: mat.define-palette(mat.$blue-gray-palette, 900, A100, A400);
 
 // The warn palette is optional (defaults to red).
 $Frontend-warn: mat.define-palette(mat.$red-palette);

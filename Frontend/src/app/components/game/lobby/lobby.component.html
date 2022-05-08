@@ -1,0 +1,66 @@
+<div class="body">
+  <h1>Tick-Tack-Bumm</h1>
+  <mat-card class="container">
+    <mat-card>
+      <app-player-list
+        class="container--left-content"
+        [players]="game.players"
+      ></app-player-list>
+    </mat-card>
+    <mat-card class="container--right-content">
+      <div class="container--right-content__buttons">
+        <button
+          class="invite"
+          mat-raised-button
+        (click)="copyLink()">Spieler einladen <mat-icon>link</mat-icon></button>
+        <button
+          class="start"
+          mat-raised-button
+          [disabled]="isFormInvalid()"
+          [class.disabled]="isFormInvalid()"
+          (click)="startGame()"
+        >Spiel starten<mat-icon>play_arrow</mat-icon></button>
+      </div>
+      <hr />
+
+      <h2>Einstellungen</h2>
+      <form
+        class="container--right-content__settings"
+        [formGroup]="form"
+      >
+        <div class="container--right-content__settings__options">
+          <mat-checkbox formControlName="allowKnown">Bekannt</mat-checkbox>
+          <mat-checkbox formControlName="allowAsked">Gefragt</mat-checkbox>
+          <mat-checkbox formControlName="allowOriginal">Original</mat-checkbox>
+          <mat-checkbox formControlName="allowShaked">Geschüttelt</mat-checkbox>
+          <mat-checkbox formControlName="allowSetted">Angesetzt</mat-checkbox>
+        </div>
+
+        <div class="container--right-content__settings__minMax">
+          <mat-form-field appearance="fill">
+            <mat-label>Min. Bomb-Timer</mat-label>
+            <input matInput type="number" min="1" formControlName="minBombTime">
+            <span matSuffix>sek.</span>
+            <mat-error *ngIf="form.get('minBombTime').invalid">Mindestens 1 Sekunde</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Max. Bomb-Timer</mat-label>
+            <input matInput type="number" max="999" formControlName="maxBombTime">
+            <span matSuffix>sek.</span>
+            <mat-error *ngIf="form.get('maxBombTime').invalid">Maximal 999 Sekunden</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Min. Spieler</mat-label>
+            <input matInput type="number" min="1" formControlName="minPlayers">
+            <mat-error *ngIf="form.get('minPlayers').invalid">Mindestens 3 Spieler</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Max. Spieler</mat-label>
+            <input matInput type="number" max="16" formControlName="maxPlayers">
+            <mat-error *ngIf="form.get('maxPlayers').invalid">Maximal 16 Spieler</mat-error>
+          </mat-form-field>
+        </div>
+      </form>
+    </mat-card>
+  </mat-card>
+</div>

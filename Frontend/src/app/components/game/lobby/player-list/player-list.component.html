@@ -1,0 +1,8 @@
+<h2>Spieler ({{ players.length }})</h2>
+<div class="list-items">
+  <app-player-item
+    *ngFor="let player of players; let last=last"
+    [player]="player">
+    <hr *ngIf="!last" />
+  </app-player-item>
+</div>
