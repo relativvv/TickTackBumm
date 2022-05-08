@@ -16,6 +16,13 @@ class GameState
     #[ORM\Column(type: 'string', length: 255)]
     private string $name;
 
+    public function toArray(): array {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName()
+        ];
+    }
+
     public function getId(): ?int
     {
         return $this->id;

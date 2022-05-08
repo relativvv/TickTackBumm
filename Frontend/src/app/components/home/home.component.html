@@ -1,8 +1,8 @@
 <div *ngIf="creationForm && !loading; else showLoading" id="main-container" class="container">
 
-  <h1 [@fadeOut]="creationForm.get('valid').value">Tick-Tack-Bumm</h1>
+  <h1>Tick-Tack-Bumm</h1>
 
-  <form [@fadeInOut] [@fadeOut]="creationForm.get('valid').value" [formGroup]="creationForm" class="container--creation-box">
+  <form [@fadeInOut] [formGroup]="creationForm" class="container--creation-box">
     <div class="container--creation-box__left-container">
       <button
         type="button"

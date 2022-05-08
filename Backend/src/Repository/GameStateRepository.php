@@ -18,27 +18,8 @@ class GameStateRepository extends ServiceEntityRepository
         parent::__construct($registry, GameState::class);
     }
 
-    /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function add(GameState $entity, bool $flush = false): void
+    public function findGameStateById(int $id): GameState
     {
-        $this->_em->persist($entity);
-        if ($flush) {
-            $this->_em->flush();
-        }
-    }
-
-    /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function remove(GameState $entity, bool $flush = false): void
-    {
-        $this->_em->remove($entity);
-        if ($flush) {
-            $this->_em->flush();
-        }
+        return $this->findOneBy(['id' => $id]);
     }
 }

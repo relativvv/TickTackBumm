@@ -2,3 +2,7 @@ create_game:
   path: /game
   controller: App\Controller\GameController::createGame
   methods: POST
+get_game:
+  path: /game/{joinKey}
+  controller: App\Controller\GameController::getGame
+  methods: GET

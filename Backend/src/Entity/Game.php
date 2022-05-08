@@ -13,8 +13,8 @@ class Game
     #[ORM\Column(type: 'integer')]
     private int $id;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    private string $joinKey;
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $joinKey;
 
     #[ORM\ManyToOne(targetEntity: GameState::class)]
     #[ORM\JoinColumn(nullable: false)]
@@ -48,7 +48,25 @@ class Game
     private int $allowSetted;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private string $password;
+    private ?string $password;
+
+    public function toArray(): array {
+        return [
+            'id' => $this->getId(),
+            'joinKey' => $this->getJoinKey(),
+            'password' => $this->getPassword(),
+            'gameState' => $this->getGameState()->toArray(),
+            'minPlayers' => $this->getMinPlayers(),
+            'maxPlayers' => $this->getMaxPlayers(),
+            'minBombTime' => $this->getMinBombTime(),
+            'maxBombTime' => $this->getMaxBombTime(),
+            'allowKnown' => $this->getAllowKnown(),
+            'allowAsked' => $this->getAllowAsked(),
+            'allowOriginal' => $this->getAllowOriginal(),
+            'allowShaked' => $this->getAllowShaked(),
+            'allowSetted' => $this->getAllowSetted()
+        ];
+    }
 
     public function getId(): ?int
     {
@@ -60,7 +78,7 @@ class Game
         return $this->joinKey;
     }
 
-    public function setJoinKey(string $joinKey): self
+    public function setJoinKey(?string $joinKey): self
     {
         $this->joinKey = $joinKey;
 

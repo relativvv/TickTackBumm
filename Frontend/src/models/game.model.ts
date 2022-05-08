@@ -1,5 +1,4 @@
 import {Player} from "./player.model";
-import {GameState} from "../enums/gamestate.enum";
 
 export interface Game {
   id?: number;
@@ -16,4 +15,9 @@ export interface Game {
   allowShaked:  boolean,
   allowSetted: boolean,
   password?: string;
+}
+
+export interface GameState {
+  id: number;
+  name?: string;
 }

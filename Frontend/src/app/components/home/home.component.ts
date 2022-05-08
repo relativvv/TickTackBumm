@@ -8,6 +8,7 @@ import {GameService} from "../../../services/game.service";
 import {Router} from "@angular/router";
 import {ToastrService} from "ngx-toastr";
 import {animate, state, style, transition, trigger} from "@angular/animations";
+import {SocketService} from "../../../services/socket.service";
 
 @Component({
   selector: 'app-home',
@@ -20,12 +21,6 @@ import {animate, state, style, transition, trigger} from "@angular/animations";
         opacity: 0
       })),
       transition('void <=> *', [animate(1000)])
-    ]),
-    trigger('fadeOut', [
-      state('false', style({
-        opacity: 0
-      })),
-      transition('* => false', [animate(1000)])
     ]),
   ],
 })
@@ -40,7 +35,8 @@ export class HomeComponent implements OnInit {
     private readonly titleService: Title,
     private readonly gameService: GameService,
     private readonly router: Router,
-    private readonly toastService: ToastrService
+    private readonly toastService: ToastrService,
+    private readonly socketService: SocketService
   ) {
     this.titleService.setTitle('Tick-Tack-Bumm | Startseite');
   }
@@ -87,10 +83,8 @@ export class HomeComponent implements OnInit {
     };
 
     const game: Game = {
-      id: null,
-      joinKey: null,
       players: [creator],
-      gameState: GameState.LOBBY,
+      gameState: { id: GameState.LOBBY },
       minPlayers: 3,
       maxPlayers: 16,
       minBombTime: 10,
@@ -100,6 +94,7 @@ export class HomeComponent implements OnInit {
       allowOriginal: true,
       allowSetted: true,
       allowShaked: true,
+      password: this.creationForm.get('setPassword').value ? this.creationForm.get('passwordValue').value : null
     }
 
     this.creationForm.get('valid').setValue(false);
@@ -109,7 +104,17 @@ export class HomeComponent implements OnInit {
       this.gameService.createGame(game)
         .subscribe({
           next: (game: Game) => {
-            this.router.navigate(['/game', { key: game.joinKey }]);
+            const payload = {
+              type: 'createRoom',
+              joinKey: game.joinKey,
+              player: {
+                userName: this.creationForm.get('username').value,
+                image: this.imageSource,
+                creator: true
+              }
+            }
+            this.socketService.getSocket().send(JSON.stringify(payload));
+            this.router.navigate(['/game'], { queryParams: { key: game.joinKey } });
           },
           error: () => {
             this.loading = false;
