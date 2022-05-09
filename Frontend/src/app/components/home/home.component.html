@@ -21,7 +21,7 @@
     <div class="container--creation-box__right-container">
         <mat-form-field appearance="standard">
           <mat-label>Wie möchtest Du heißen?</mat-label>
-          <input formControlName="username" matInput>
+          <input formControlName="username" maxlength="14" matInput>
           <mat-icon matSuffix>person</mat-icon>
         </mat-form-field>
 
@@ -37,8 +37,8 @@
       <button
         class="container--creation-box__right-container__create-button"
         mat-raised-button
-        [disabled]="creationForm.invalid || !creationForm.get('valid').value"
-        [class.disabled]="creationForm.invalid || !creationForm.get('valid').value"
+        [disabled]="formInvalid()"
+        [class.disabled]="formInvalid()"
         (click)="createGame()">
         <mat-icon>play_arrow</mat-icon>
         Spiel erstellen

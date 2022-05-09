@@ -2,7 +2,13 @@ create_game:
   path: /game
   controller: App\Controller\GameController::createGame
   methods: POST
+
 get_game:
   path: /game/{joinKey}
   controller: App\Controller\GameController::getGame
+  methods: GET
+
+verify_password:
+  path: /game/{joinKey}/verifyPassword
+  controller: App\Controller\GameController::verifyPassword
   methods: GET

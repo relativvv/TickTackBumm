@@ -54,7 +54,6 @@ class Game
         return [
             'id' => $this->getId(),
             'joinKey' => $this->getJoinKey(),
-            'password' => $this->getPassword(),
             'gameState' => $this->getGameState()->toArray(),
             'minPlayers' => $this->getMinPlayers(),
             'maxPlayers' => $this->getMaxPlayers(),
@@ -64,7 +63,8 @@ class Game
             'allowAsked' => $this->getAllowAsked(),
             'allowOriginal' => $this->getAllowOriginal(),
             'allowShaked' => $this->getAllowShaked(),
-            'allowSetted' => $this->getAllowSetted()
+            'allowSetted' => $this->getAllowSetted(),
+            'hasPassword' => $this->getPassword() !== null
         ];
     }
 

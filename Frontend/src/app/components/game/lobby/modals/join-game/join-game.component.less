@@ -1,0 +1,50 @@
+:host {
+  .container {
+    &--top-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      flex-direction: column;
+      margin-top: 12px;
+
+      &__image {
+        width: 225px;
+        height: 225px;
+        border-radius: 360px;
+        box-shadow: 2px 5px 10px black;
+      }
+    }
+
+    &--bottom-box {
+      margin-top: 24px;
+
+      mat-form-field {
+        width: 100%;
+        font-size: 18px;
+      }
+    }
+  }
+
+  .actions {
+    .join-button {
+      height: 55px;
+      width: 300px;
+      background: linear-gradient(-45deg, #00ff54, #5aff00, #5af661, #47ef0e);
+      background-size: 400% 400%;
+      animation: gradient 3s ease infinite;
+      transition: 0.8s;
+      margin: 18px auto 24px;
+      color: black;
+
+      &:hover {
+        transform: scale(1.08);
+      }
+    }
+  }
+
+  .disabled {
+    background-image: linear-gradient(gray, darkgray) !important;
+    color: white !important;
+  }
+}

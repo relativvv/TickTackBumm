@@ -5,6 +5,9 @@ import {Router} from "@angular/router";
 import {ToastrService} from "ngx-toastr";
 import {Game} from "../../../../models/game.model";
 import {combineLatest} from "rxjs";
+import {MatDialog} from "@angular/material/dialog";
+import {JoinGameComponent} from "./modals/join-game/join-game.component";
+import {SocketService} from "../../../../services/socket.service";
 
 @Component({
   selector: 'app-lobby',
@@ -19,12 +22,15 @@ export class LobbyComponent implements OnInit {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly clipboard: Clipboard,
-    private readonly toastService: ToastrService
+    private readonly toastService: ToastrService,
   ) {
   }
 
   ngOnInit(): void {
     this.createForm();
+    if(this.game.players.length >= this.game.maxPlayers) {
+      alert('Die Runde ist voll!');
+    }
   }
 
   createForm(): void {
@@ -56,23 +62,19 @@ export class LobbyComponent implements OnInit {
   }
 
   startGame(): void {
-    document.getElementsByClassName('body')[0].classList.add('fade-out');
-    setTimeout(() => {
-      document.getElementsByClassName('body')[0].classList.add('hidden');
-    }, 2500);
+
   }
 
   isFormInvalid(): boolean {
-    return this.form.invalid || !this.isBombTimeAllowed() || !this.isPlayerCountAllowed();
+    return this.form.invalid || !this.isBombTimeAllowed() || !this.isPlayerCountAllowed() || this.game.players.length < this.form.get('minPlayers').value;
   }
 
   private isBombTimeAllowed(): boolean {
-    return this.form.get('minBombTime').value < this.form.get('maxBombTime').value
+    return this.form.get('minBombTime').value < this.form.get('maxBombTime').value;
   }
 
-
   private isPlayerCountAllowed(): boolean {
-    return this.form.get('minPlayers').value < this.form.get('maxPlayers').value
+    return this.form.get('minPlayers').value < this.form.get('maxPlayers').value;
   }
 
 }
