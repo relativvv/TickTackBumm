@@ -2,11 +2,14 @@
 
 namespace App\Controller;
 
+use App\Exception\GameException;
 use App\Services\GameService;
 use App\Services\Serializer\GameSerializer;
+use Ratchet\Wamp\JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class GameController extends AbstractController
 {
@@ -23,6 +26,21 @@ class GameController extends AbstractController
 
        $game = $this->gameService->createGame($deserializedGame);
         return new JsonResponse($game->toArray());
+    }
+
+    public function verifyPassword(Request $request, string $joinKey): JsonResponse {
+        $game = $this->gameService->getGameByJoinKey($joinKey);
+
+        if($request->get('password') === null) {
+            throw new GameException('No password given!');
+        }
+        $password = $request->get('password');
+
+        if (!password_verify($password, $game->getPassword())) {
+            throw new GameException('Invalid password', '');
+        }
+
+        return new JsonResponse(Response::HTTP_OK);
     }
 
     public function getGame(string $joinKey): JsonResponse

@@ -53,7 +53,11 @@ class GameSerializer
         }
 
         if(isset($data['password'])) {
-            $game->setPassword($data['password']);
+            if (password_get_info($data['password'])['algo'] === 0) {
+                $game->setPassword(password_hash($data['password'], PASSWORD_DEFAULT));
+            } else {
+                $game->setPassword($data['password']);
+            }
         } else {
             $game->setPassword(null);
         }

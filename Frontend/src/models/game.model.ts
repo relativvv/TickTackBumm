@@ -15,6 +15,7 @@ export interface Game {
   allowShaked:  boolean,
   allowSetted: boolean,
   password?: string;
+  hasPassword: boolean;
 }
 
 export interface GameState {

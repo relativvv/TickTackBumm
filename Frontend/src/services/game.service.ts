@@ -22,4 +22,11 @@ export class GameService {
   public createGame(game: Game): Observable<Game> {
     return this.http.post<Game>(this.backend + '/game', game);
   }
+
+  public verifyPassword(key: string, password: string): Observable<void> {
+    let httpParams = new HttpParams();
+    httpParams = httpParams.append('password', password);
+
+    return this.http.get<void>(this.backend + '/game/' + key + '/verifyPassword', { params: httpParams });
+  }
 }

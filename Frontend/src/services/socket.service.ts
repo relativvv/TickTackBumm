@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {environment} from "../environments/environment";
 import {ToastrService} from "ngx-toastr";
+import {Router} from "@angular/router";
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,8 @@ export class SocketService {
   private socket: WebSocket;
 
   constructor(
-    private readonly toastService: ToastrService
+    private readonly toastService: ToastrService,
+    private readonly router: Router
   ) { }
 
   public handleSocket(): void {
@@ -19,6 +21,7 @@ export class SocketService {
 
     this.socket.onerror = () => {
       this.toastService.error('Eine Verbindung zum WebSocket ist fehlgeschlagen..');
+      this.router.navigate(['/']);
     }
   }
 

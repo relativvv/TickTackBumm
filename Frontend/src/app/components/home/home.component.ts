@@ -9,6 +9,7 @@ import {Router} from "@angular/router";
 import {ToastrService} from "ngx-toastr";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {SocketService} from "../../../services/socket.service";
+import {UserService} from "../../../services/user.service";
 
 @Component({
   selector: 'app-home',
@@ -36,43 +37,27 @@ export class HomeComponent implements OnInit {
     private readonly gameService: GameService,
     private readonly router: Router,
     private readonly toastService: ToastrService,
-    private readonly socketService: SocketService
+    private readonly socketService: SocketService,
+    private readonly userService: UserService
   ) {
     this.titleService.setTitle('Tick-Tack-Bumm | Startseite');
   }
 
   ngOnInit(): void {
     this.createForm();
-    this.imageSource = HomeComponent.getRandomProfileImageString();
+    this.imageSource = this.userService.getRandomProfileImageString();
   }
 
   setRandomProfileImage(): void {
     document.getElementById('refresh-profile').setAttribute('disabled', 'true');
     document.getElementById('refresh-profile').classList.add('disabled');
 
-    this.imageSource = HomeComponent.getRandomProfileImageString();
+    this.imageSource = this.userService.getRandomProfileImageString();
 
     setTimeout(() => {
       document.getElementById('refresh-profile').removeAttribute('disabled')
       document.getElementById('refresh-profile').classList.remove('disabled');
-    }, 1000);
-  }
-
-  private static getRandomProfileImageString() {
-    const profileImages = [
-      "../../../../assets/images/profile1.jpg",
-      "../../../../assets/images/profile2.jpg",
-      "../../../../assets/images/profile3.jpg",
-      "../../../../assets/images/profile4.png",
-      "../../../../assets/images/profile5.jpg",
-      "../../../../assets/images/profile6.jpg",
-      "../../../../assets/images/profile7.PNG",
-      "../../../../assets/images/profile8.jpg",
-      "../../../../assets/images/profile9.jpg",
-    ]
-
-    const rnd = Math.floor(Math.random() * 9);
-    return profileImages[rnd];
+    }, 300);
   }
 
   createGame(): void {
@@ -94,7 +79,8 @@ export class HomeComponent implements OnInit {
       allowOriginal: true,
       allowSetted: true,
       allowShaked: true,
-      password: this.creationForm.get('setPassword').value ? this.creationForm.get('passwordValue').value : null
+      password: this.creationForm.get('setPassword').value ? this.creationForm.get('passwordValue').value : null,
+      hasPassword: !!this.creationForm.get('setPassword')
     }
 
     this.creationForm.get('valid').setValue(false);
@@ -113,6 +99,7 @@ export class HomeComponent implements OnInit {
                 creator: true
               }
             }
+
             this.socketService.getSocket().send(JSON.stringify(payload));
             this.router.navigate(['/game'], { queryParams: { key: game.joinKey } });
           },
@@ -127,9 +114,20 @@ export class HomeComponent implements OnInit {
     }, 1400)
   }
 
+  socketNotReady(): boolean {
+    return this.socketService.getSocket().readyState !== WebSocket.OPEN;
+  }
+
+  formInvalid(): boolean {
+    return this.creationForm.invalid ||
+      !this.creationForm.get('valid').value ||
+      this.socketNotReady() ||
+      (this.creationForm.get('setPassword').value === true && this.creationForm.get('password').value.length < 1)
+  }
+
   private createForm(): void {
     this.creationForm = this.formBuilder.group({
-      username: ['', [Validators.required]],
+      username: ['', [Validators.required, Validators.maxLength(14)]],
       setPassword: [false],
       passwordValue: [{value: '', disabled: true}],
       valid: [true]
