@@ -47,6 +47,9 @@ class Game
     #[ORM\Column(type: 'boolean')]
     private int $allowSetted;
 
+    #[ORM\Column(type: 'boolean')]
+    private int $enableJoker;
+
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $password;
 
@@ -64,6 +67,7 @@ class Game
             'allowOriginal' => $this->getAllowOriginal(),
             'allowShaked' => $this->getAllowShaked(),
             'allowSetted' => $this->getAllowSetted(),
+            'enableJoker' => $this->getJokerEnabled(),
             'hasPassword' => $this->getPassword() !== null
         ];
     }
@@ -213,6 +217,16 @@ class Game
     public function setPassword(?string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getJokerEnabled(): ?bool {
+        return $this->enableJoker;
+    }
+
+    public function setJokerEnabled(bool $enableJoker): self {
+        $this->enableJoker = $enableJoker;
 
         return $this;
     }

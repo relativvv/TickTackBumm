@@ -3,6 +3,8 @@
     <app-lobby
       *ngSwitchCase="LOBBY"
       [game]="game"
+      [player]="player"
+      [form]="lobbyForm"
     ></app-lobby>
     <app-ingame
       *ngSwitchCase="INGAME"

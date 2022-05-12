@@ -12,7 +12,7 @@ export class GameService {
   private backend = environment.backendUrl
 
   constructor(
-    private readonly http: HttpClient
+    private readonly http: HttpClient,
   ) { }
 
   public getGameByJoinKey(key: string): Observable<Game> {

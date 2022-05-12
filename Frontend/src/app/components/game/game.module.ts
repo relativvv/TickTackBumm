@@ -14,6 +14,7 @@ import {MatInputModule} from "@angular/material/input";
 import {MatCardModule} from "@angular/material/card";
 import { JoinGameComponent } from './lobby/modals/join-game/join-game.component';
 import {MatDialogModule} from "@angular/material/dialog";
+import {MatTooltipModule} from "@angular/material/tooltip";
 
 @NgModule({
   declarations: [
@@ -24,16 +25,17 @@ import {MatDialogModule} from "@angular/material/dialog";
     PlayerItemComponent,
     JoinGameComponent
   ],
-  imports: [
-    CommonModule,
-    MatIconModule,
-    ReactiveFormsModule,
-    MatButtonModule,
-    MatCheckboxModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatCardModule,
-    MatDialogModule
-  ]
+    imports: [
+        CommonModule,
+        MatIconModule,
+        ReactiveFormsModule,
+        MatButtonModule,
+        MatCheckboxModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatCardModule,
+        MatDialogModule,
+        MatTooltipModule
+    ]
 })
 export class GameModule { }

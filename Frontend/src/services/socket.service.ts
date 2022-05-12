@@ -9,15 +9,27 @@ import {Router} from "@angular/router";
 export class SocketService {
 
   private socket: WebSocket;
+  public playerResourceId: string;
 
   constructor(
     private readonly toastService: ToastrService,
-    private readonly router: Router
+    private readonly router: Router,
   ) { }
 
   public handleSocket(): void {
     this.socket = new WebSocket(environment.webSocketUrl);
-    this.socket.onopen = () => { };
+    this.socket.onopen = () => {
+      this.socket.send(JSON.stringify({
+        type: 'getResourceId'
+      }));
+
+      this.socket.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        if(data.type === 'resourceId') {
+          this.playerResourceId = data.resourceId;
+        }
+      }
+    };
 
     this.socket.onerror = () => {
       this.toastService.error('Eine Verbindung zum WebSocket ist fehlgeschlagen..');

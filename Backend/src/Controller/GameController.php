@@ -37,7 +37,7 @@ class GameController extends AbstractController
         $password = $request->get('password');
 
         if (!password_verify($password, $game->getPassword())) {
-            throw new GameException('Invalid password', '');
+            throw new GameException('Invalid password', 400);
         }
 
         return new JsonResponse(Response::HTTP_OK);

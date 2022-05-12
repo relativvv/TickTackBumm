@@ -79,6 +79,7 @@ export class HomeComponent implements OnInit {
       allowOriginal: true,
       allowSetted: true,
       allowShaked: true,
+      enableJoker: true,
       password: this.creationForm.get('setPassword').value ? this.creationForm.get('passwordValue').value : null,
       hasPassword: !!this.creationForm.get('setPassword')
     }
@@ -99,6 +100,10 @@ export class HomeComponent implements OnInit {
                 creator: true
               }
             }
+
+            let player: Player = payload.player;
+            player.resourceId = this.socketService.playerResourceId;
+            this.userService.setPlayer(player);
 
             this.socketService.getSocket().send(JSON.stringify(payload));
             this.router.navigate(['/game'], { queryParams: { key: game.joinKey } });
@@ -122,7 +127,7 @@ export class HomeComponent implements OnInit {
     return this.creationForm.invalid ||
       !this.creationForm.get('valid').value ||
       this.socketNotReady() ||
-      (this.creationForm.get('setPassword').value === true && this.creationForm.get('password').value.length < 1)
+      (this.creationForm.get('setPassword').value === true && this.creationForm.get('passwordValue').value.length < 1)
   }
 
   private createForm(): void {

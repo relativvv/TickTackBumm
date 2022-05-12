@@ -14,6 +14,7 @@ export interface Game {
   allowOriginal:  boolean,
   allowShaked:  boolean,
   allowSetted: boolean,
+  enableJoker: boolean;
   password?: string;
   hasPassword: boolean;
 }

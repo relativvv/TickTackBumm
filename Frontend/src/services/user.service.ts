@@ -1,11 +1,20 @@
 import { Injectable } from '@angular/core';
+import {Store} from "@ngrx/store";
+import {setPlayer} from "../core/store/player/player.actions";
+import {Player} from "../models/player.model";
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  constructor() { }
+  constructor(
+    private readonly store: Store
+  ) { }
+
+  public setPlayer(player: Player): void {
+    this.store.dispatch(setPlayer({player: player}));
+  }
 
   public getRandomProfileImageString() {
     const profileImages = [
@@ -27,4 +36,7 @@ export class UserService {
     return profileImages[rnd];
   }
 
+  public hasPermission(player): boolean {
+    return player ? player.creator : false;
+  }
 }

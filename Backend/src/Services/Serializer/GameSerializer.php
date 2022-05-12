@@ -5,11 +5,13 @@ namespace App\Services\Serializer;
 use App\Entity\Game;
 use App\Exception\GameException;
 use App\Repository\GameStateRepository;
+use Psr\Log\LoggerInterface;
 
 class GameSerializer
 {
     public function __construct(
-        private GameStateRepository $gameStateRepository
+        private GameStateRepository $gameStateRepository,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -47,13 +49,14 @@ class GameSerializer
         $game->setAllowOriginal($data['allowOriginal']);
         $game->setAllowShaked($data['allowShaked']);
         $game->setAllowSetted($data['allowSetted']);
+        $game->setJokerEnabled($data['enableJoker']);
 
         if(isset($data['joinKey'])) {
             $game->setJoinKey($data['joinKey']);
         }
 
         if(isset($data['password'])) {
-            if (password_get_info($data['password'])['algo'] === 0) {
+            if (password_get_info($data['password'])['algo'] !== 1) {
                 $game->setPassword(password_hash($data['password'], PASSWORD_DEFAULT));
             } else {
                 $game->setPassword($data['password']);

@@ -1,13 +1,10 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup} from "@angular/forms";
 import {Clipboard} from "@angular/cdk/clipboard";
-import {Router} from "@angular/router";
 import {ToastrService} from "ngx-toastr";
 import {Game} from "../../../../models/game.model";
-import {combineLatest} from "rxjs";
-import {MatDialog} from "@angular/material/dialog";
-import {JoinGameComponent} from "./modals/join-game/join-game.component";
-import {SocketService} from "../../../../services/socket.service";
+import {Player} from "../../../../models/player.model";
+import {UserService} from "../../../../services/user.service";
 
 @Component({
   selector: 'app-lobby',
@@ -16,44 +13,27 @@ import {SocketService} from "../../../../services/socket.service";
 })
 export class LobbyComponent implements OnInit {
 
+  @Input() form: FormGroup;
   @Input() game: Game;
-  form: FormGroup;
+  @Input() player: Player;
+
 
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly clipboard: Clipboard,
     private readonly toastService: ToastrService,
+    private readonly userService: UserService
   ) {
   }
 
   ngOnInit(): void {
-    this.createForm();
-    if(this.game.players.length >= this.game.minPlayers) {
-      alert('Die Runde ist voll!');
+    if(this.game.players.length >= this.game.maxPlayers) {
+      return;
     }
-  }
 
-  createForm(): void {
-    this.form = this.formBuilder.group({
-      allowKnown: [true],
-      allowAsked: [true],
-      allowOriginal: [true],
-      allowShaked: [true],
-      allowSetted: [true],
-      minBombTime: [10, [Validators.required, Validators.min(1)]],
-      maxBombTime: [50, [Validators.required, Validators.max(999)]],
-      minPlayers: [3, [Validators.required, Validators.min(3)]],
-      maxPlayers: [8, [Validators.required, Validators.max(16)]],
-    });
-
-    const minPlayerValueChange$ = this.form.get('minPlayers').valueChanges;
-    const maxPlayerValueChanges$ = this.form.get('maxPlayers').valueChanges;
-
-    combineLatest([minPlayerValueChange$, maxPlayerValueChanges$])
-      .subscribe(([minP, maxP]) => {
-        this.game.minPlayers = minP;
-        this.game.maxPlayers = maxP;
-      })
+    if(this.game.players.length === 0) {
+      return;
+    }
   }
 
   copyLink(): void {
@@ -66,7 +46,7 @@ export class LobbyComponent implements OnInit {
   }
 
   isFormInvalid(): boolean {
-    return this.form.invalid || !this.isBombTimeAllowed() || !this.isPlayerCountAllowed() || this.game.players.length < this.form.get('minPlayers').value;
+    return this.form.invalid || !this.isBombTimeAllowed() || !this.isPlayerCountAllowed() || this.game.players.length < this.form.get('minPlayers').value || !this.userService.hasPermission(this.player);
   }
 
   private isBombTimeAllowed(): boolean {
@@ -76,5 +56,4 @@ export class LobbyComponent implements OnInit {
   private isPlayerCountAllowed(): boolean {
     return this.form.get('minPlayers').value < this.form.get('maxPlayers').value;
   }
-
 }

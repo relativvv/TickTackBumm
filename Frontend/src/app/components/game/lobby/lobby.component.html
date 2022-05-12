@@ -1,66 +1,105 @@
 <div class="body">
-  <h1>Tick-Tack-Bumm</h1>
-  <mat-card class="container">
-    <mat-card>
-      <app-player-list
-        class="container--left-content"
-        [players]="game.players"
-      ></app-player-list>
-    </mat-card>
-    <mat-card class="container--right-content">
-      <div class="container--right-content__buttons">
-        <button
-          class="invite"
-          mat-raised-button
-        (click)="copyLink()">Spieler einladen <mat-icon>link</mat-icon></button>
-        <button
-          class="start"
-          mat-raised-button
-          [disabled]="isFormInvalid()"
-          [class.disabled]="isFormInvalid()"
-          (click)="startGame()"
-        >Spiel starten<mat-icon>play_arrow</mat-icon></button>
-      </div>
-      <hr />
-
-      <h2>Einstellungen</h2>
-      <form
-        class="container--right-content__settings"
-        [formGroup]="form"
-      >
-        <div class="container--right-content__settings__options">
-          <mat-checkbox formControlName="allowKnown">Bekannt</mat-checkbox>
-          <mat-checkbox formControlName="allowAsked">Gefragt</mat-checkbox>
-          <mat-checkbox formControlName="allowOriginal">Original</mat-checkbox>
-          <mat-checkbox formControlName="allowShaked">Geschüttelt</mat-checkbox>
-          <mat-checkbox formControlName="allowSetted">Angesetzt</mat-checkbox>
+  <ng-container *ngIf="game && form">
+    <h1>Tick-Tack-Bumm</h1>
+    <mat-card class="container">
+      <mat-card>
+        <app-player-list
+          class="container--left-content"
+          [players]="game.players"
+        ></app-player-list>
+      </mat-card>
+      <mat-card class="container--right-content">
+        <div class="container--right-content__buttons">
+          <button
+            class="invite"
+            mat-raised-button
+          (click)="copyLink()">Spieler einladen <mat-icon>link</mat-icon></button>
+          <button
+            class="start"
+            mat-raised-button
+            [disabled]="isFormInvalid()"
+            [class.disabled]="isFormInvalid()"
+            (click)="startGame()"
+          >Spiel starten<mat-icon>play_arrow</mat-icon></button>
         </div>
+        <hr />
 
-        <div class="container--right-content__settings__minMax">
-          <mat-form-field appearance="fill">
-            <mat-label>Min. Bomb-Timer</mat-label>
-            <input matInput type="number" min="1" formControlName="minBombTime">
-            <span matSuffix>sek.</span>
-            <mat-error *ngIf="form.get('minBombTime').invalid">Mindestens 1 Sekunde</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="fill">
-            <mat-label>Max. Bomb-Timer</mat-label>
-            <input matInput type="number" max="999" formControlName="maxBombTime">
-            <span matSuffix>sek.</span>
-            <mat-error *ngIf="form.get('maxBombTime').invalid">Maximal 999 Sekunden</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="fill">
-            <mat-label>Min. Spieler</mat-label>
-            <input matInput type="number" min="1" formControlName="minPlayers">
-            <mat-error *ngIf="form.get('minPlayers').invalid">Mindestens 3 Spieler</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="fill">
-            <mat-label>Max. Spieler</mat-label>
-            <input matInput type="number" max="16" formControlName="maxPlayers">
-            <mat-error *ngIf="form.get('maxPlayers').invalid">Maximal 16 Spieler</mat-error>
-          </mat-form-field>
-        </div>
-      </form>
+        <h2>Einstellungen</h2>
+        <form
+          class="container--right-content__settings"
+          [formGroup]="form"
+        >
+          <div class="container--right-content__settings__options">
+            <div class="container--right-content__settings__options__option">
+              <mat-checkbox formControlName="allowKnown">Bekannt</mat-checkbox>
+              <mat-icon
+                matTooltip="Die Karte zeigt 2 Buchstaben. Es müssen bekannte Persönlichkeiten genannt werden, deren Vornamen mit einem der beiden Buchstaben auf der Karte beginnen.">
+                help
+              </mat-icon>
+            </div>
+            <div class="container--right-content__settings__options__option">
+              <mat-checkbox  formControlName="allowAsked">Gefragt</mat-checkbox>
+              <mat-icon
+                matTooltip="Die Karte zeigt eine Frage. Es müssen Wörter genannt werden, die in das gefragte Szenario passen.">
+                help
+              </mat-icon>
+            </div>
+            <div class="container--right-content__settings__options__option">
+              <mat-checkbox formControlName="allowOriginal">Original</mat-checkbox>
+              <mat-icon
+                matTooltip="Die Karte zeigt eine kurze Buchstabenkombination und ein Würfel wird geworfen. Das Würfelergebnis legt fest, wo die gezogene Buchstabenkombination in dem Wort stehen muss.">
+                help
+              </mat-icon>
+            </div>
+            <div class="container--right-content__settings__options__option">
+              <mat-checkbox formControlName="allowShaked">Geschüttelt</mat-checkbox>
+              <mat-icon
+                matTooltip="Die Karte zeigt ein Anagramm eines zusammengesetzten Hauptwortes. Es muss ein Wort aus den vorgegebenen Buchstaben gebildet werden, das mindestens 4 Buchstaben hat.">
+                help
+              </mat-icon>
+            </div>
+            <div class="container--right-content__settings__options__option">
+              <mat-checkbox formControlName="allowSetted">Angesetzt</mat-checkbox>
+              <mat-icon
+                matTooltip="Die Karte zeigt ein Wort. Es muss ein Wort gefunden werden, das mit dem vorgegebenen Wort zusammengesetzt werden kann.">
+                help
+              </mat-icon>
+            </div>
+            <div class="container--right-content__settings__options__option">
+              <mat-checkbox formControlName="enableJoker">Joker aktivieren</mat-checkbox>
+              <mat-icon
+                matTooltip="Du darfst dir aussuchen, welche Kategorie du spielen möchtest">
+                help
+              </mat-icon>
+            </div>
+          </div>
+
+          <div class="container--right-content__settings__minMax">
+            <mat-form-field appearance="fill">
+              <mat-label>Min. Bomb-Timer</mat-label>
+              <input matInput type="number" min="1" formControlName="minBombTime">
+              <span matSuffix>sek.</span>
+              <mat-error *ngIf="form.get('minBombTime').invalid">Mindestens 1 Sekunde</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Max. Bomb-Timer</mat-label>
+              <input matInput type="number" max="999" formControlName="maxBombTime">
+              <span matSuffix>sek.</span>
+              <mat-error *ngIf="form.get('maxBombTime').invalid">Maximal 999 Sekunden</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Min. Spieler</mat-label>
+              <input matInput type="number" min="1" formControlName="minPlayers">
+              <mat-error *ngIf="form.get('minPlayers').invalid">Mindestens 3 Spieler</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Max. Spieler</mat-label>
+              <input matInput type="number" max="16" formControlName="maxPlayers">
+              <mat-error *ngIf="form.get('maxPlayers').invalid">Maximal 16 Spieler</mat-error>
+            </mat-form-field>
+          </div>
+        </form>
+      </mat-card>
     </mat-card>
-  </mat-card>
+  </ng-container>
 </div>

@@ -8,6 +8,7 @@ import {catchError} from "rxjs/operators";
 import {NEVER} from "rxjs";
 import {ToastrService} from "ngx-toastr";
 import {SocketService} from "../../../../../../services/socket.service";
+import {Player} from "../../../../../../models/player.model";
 
 interface DialogData {
   game: Game;
@@ -37,7 +38,7 @@ export class JoinGameComponent implements OnInit {
   ngOnInit(): void {
     this.game = this.data.game;
     this.createForm();
-    this.setRandomProfileImage();
+    this.imageSource = this.userService.getRandomProfileImageString();
   }
 
   close(): void {
@@ -57,22 +58,46 @@ export class JoinGameComponent implements OnInit {
   }
 
   joinRound(): void {
-    const pw = this.form.get('password').value;
-    this.gameService.verifyPassword(this.game.joinKey, pw)
-      .pipe(
-        catchError(() => {
-          this.toastService.error('Das Passwort ist falsch!')
-          return NEVER;
+    if(this.form.get('username').value.length < 1) {
+      this.toastService.error('Du musst einen Nutzernamen angeben!');
+      return;
+    }
+
+    let player: Player = {
+      userName: this.form.get('username').value,
+      image: this.imageSource,
+      creator: false
+    }
+
+    if(this.game.hasPassword) {
+      const pw = this.form.get('password').value;
+      this.gameService.verifyPassword(this.game.joinKey, pw)
+        .pipe(
+          catchError(() => {
+            this.toastService.error('Das Passwort ist falsch!')
+            return NEVER;
+          })
+        )
+        .subscribe(() => {
+          this.socketService.getSocket().send(JSON.stringify({
+            type: 'joinRoom',
+            joinKey: this.game.joinKey,
+            player: player,
+          }));
+          this.close();
         })
-      )
-      .subscribe(() => {
-        this.socketService.getSocket().send(JSON.stringify({
-          type: 'joinRoom',
-          key: this.game.joinKey,
-          userName: this.form.get('username').value,
-          image: this.imageSource
-        }))
-      })
+      return;
+    }
+
+      this.socketService.getSocket().send(JSON.stringify({
+        type: 'joinRoom',
+        joinKey: this.game.joinKey,
+        player: player,
+      }));
+
+      player.resourceId = this.socketService.playerResourceId;
+      this.userService.setPlayer(player);
+      this.close();
   }
 
   private createForm(): void {

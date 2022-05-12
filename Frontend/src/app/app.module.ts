@@ -18,6 +18,8 @@ import {SharedModule} from "./components/shared/shared.module";
 import {ToastrModule} from "ngx-toastr";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import { HttpClientModule } from "@angular/common/http";
+import {StoreModule} from "@ngrx/store";
+import {playerReducer} from "../core/store/player/player.reducer";
 
 @NgModule({
   declarations: [
@@ -38,9 +40,10 @@ import { HttpClientModule } from "@angular/common/http";
     ReactiveFormsModule,
     GameModule,
     SharedModule,
-    ToastrModule.forRoot(),
     MatProgressSpinnerModule,
-    HttpClientModule
+    HttpClientModule,
+    ToastrModule.forRoot(),
+    StoreModule.forRoot({ player: playerReducer })
   ],
   providers: [],
   bootstrap: [
