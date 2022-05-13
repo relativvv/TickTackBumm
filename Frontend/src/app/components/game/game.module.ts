@@ -16,6 +16,10 @@ import { JoinGameComponent } from './lobby/modals/join-game/join-game.component'
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {SharedModule} from "../shared/shared.module";
+import { ChatComponent } from './ingame/chat/chat.component';
+import { GameAreaComponent } from './ingame/game-area/game-area.component';
+import { MessageItemComponent } from './ingame/chat/message-item/message-item.component';
+import {MatChipsModule} from "@angular/material/chips";
 
 @NgModule({
   declarations: [
@@ -24,20 +28,24 @@ import {SharedModule} from "../shared/shared.module";
     IngameComponent,
     PlayerListComponent,
     PlayerItemComponent,
-    JoinGameComponent
+    JoinGameComponent,
+    ChatComponent,
+    GameAreaComponent,
+    MessageItemComponent
   ],
-  imports: [
-    CommonModule,
-    MatIconModule,
-    ReactiveFormsModule,
-    MatButtonModule,
-    MatCheckboxModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatCardModule,
-    MatDialogModule,
-    MatTooltipModule,
-    SharedModule
-  ]
+    imports: [
+        CommonModule,
+        MatIconModule,
+        ReactiveFormsModule,
+        MatButtonModule,
+        MatCheckboxModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatCardModule,
+        MatDialogModule,
+        MatTooltipModule,
+        SharedModule,
+        MatChipsModule
+    ]
 })
 export class GameModule { }
