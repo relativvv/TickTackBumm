@@ -5,3 +5,8 @@ export enum PlayingCardType {
   GESCHUETTELT = 3,
   ANGESETZT = 4
 }
+
+export enum PlayingCardState {
+  OPEN = 0,
+  HIDDEN = 1
+}

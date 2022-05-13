@@ -5,11 +5,36 @@ import {ToastrService} from "ngx-toastr";
 import {Game} from "../../../../models/game.model";
 import {Player} from "../../../../models/player.model";
 import {UserService} from "../../../../services/user.service";
+import {animate, state, style, transition, trigger} from "@angular/animations";
+import {GameState} from "../../../../enums/gamestate.enum";
 
 @Component({
   selector: 'app-lobby',
   templateUrl: './lobby.component.html',
-  styleUrls: ['./lobby.component.less']
+  styleUrls: ['./lobby.component.less'],
+  animations: [
+    trigger('fadeWhole', [
+      transition(':enter', [
+        style({ top: 35, opacity: 0 }),
+        animate('500ms', style({ opacity: 1, top: 0 }))
+      ]),
+      transition(':leave', [
+        style({ top: 0, opacity: 1 }),
+        animate('500ms', style({ opacity: 0, top: 100 }))
+      ]),
+    ]),
+    trigger('fadeSingle', [
+      state('notStarted', style({
+        opacity: 0
+      })),
+      state('start', style({
+        opacity: 1
+      })),
+      transition('notStarted <=> start', [
+        animate('400ms')
+      ])
+    ]),
+  ],
 })
 export class LobbyComponent implements OnInit {
 
@@ -17,6 +42,8 @@ export class LobbyComponent implements OnInit {
   @Input() game: Game;
   @Input() player: Player;
 
+  singleState = 'notStarted';
+  removeComponent = false;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -27,6 +54,10 @@ export class LobbyComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    setTimeout(() => {
+      this.singleState = 'start';
+    }, 200);
+
     if(this.game.players.length >= this.game.maxPlayers) {
       return;
     }
@@ -42,7 +73,12 @@ export class LobbyComponent implements OnInit {
   }
 
   startGame(): void {
+    this.singleState = 'notStarted';
+    this.removeComponent = true;
 
+    setTimeout(() => {
+      this.game.gameState.id = GameState.INGAME;
+    }, 500)
   }
 
   isFormInvalid(): boolean {

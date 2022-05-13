@@ -4,7 +4,7 @@ import {Player} from "../../../../../../models/player.model";
 @Component({
   selector: 'app-player-item',
   templateUrl: './player-item.component.html',
-  styleUrls: ['./player-item.component.less']
+  styleUrls: ['./player-item.component.less'],
 })
 export class PlayerItemComponent implements OnInit {
 

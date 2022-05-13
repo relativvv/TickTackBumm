@@ -28,7 +28,8 @@ class GameController extends AbstractController
         return new JsonResponse($game->toArray());
     }
 
-    public function verifyPassword(Request $request, string $joinKey): JsonResponse {
+    public function verifyPassword(Request $request, string $joinKey): JsonResponse
+    {
         $game = $this->gameService->getGameByJoinKey($joinKey);
 
         if($request->get('password') === null) {
@@ -49,8 +50,20 @@ class GameController extends AbstractController
         return new JsonResponse($game->toArray());
     }
 
-    private function getData(Request $request): array {
-        return json_decode($request->getContent(), true);
+    public function updateGame(int $id, Request $request): JsonResponse
+    {
+        $data = $this->getData($request);
+        $deserializedGame = $this->gameSerializer->deserialize($data);
+
+        $oldGame = $this->gameService->getGameById($id);
+        $updatedGame = $this->gameService->mergeGame($oldGame, $deserializedGame);
+
+        return new JsonResponse($updatedGame->toArray());
+    }
+
+    private function getData(Request $request): array
+    {
+        return json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
     }
 
 }

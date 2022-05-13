@@ -1,4 +1,30 @@
 <div class="playing-card--container">
-  <span class="playing-card--container__category"><mat-icon>wc</mat-icon> test</span>
-  <div class="playing-card--container__content"></div>
+  <ng-container [ngSwitch]="state">
+    <!-- OPEN -->
+    <div *ngSwitchCase="0">
+
+    </div>
+
+    <!-- HIDDEN -->
+    <div *ngSwitchCase="1">
+      <div class="playing-card--container__category">
+        <ng-container [ngSwitch]="playingCardType">
+          <mat-icon *ngSwitchCase="0">wc</mat-icon>
+          <mat-icon *ngSwitchCase="1">help</mat-icon>
+          <mat-icon *ngSwitchCase="2">dehaze</mat-icon>
+          <mat-icon *ngSwitchCase="3">texture</mat-icon>
+          <mat-icon *ngSwitchCase="4">tab</mat-icon>
+        </ng-container>
+        <hr />
+        <span
+          [class.known]="playingCardType === 0"
+          [class.asked]="playingCardType === 1"
+          [class.original]="playingCardType === 2"
+          [class.shaked]="playingCardType === 3"
+          [class.setted]="playingCardType === 4"
+        >{{ getPlayingCardTypeString() }}</span>
+        <hr />
+      </div>
+    </div>
+  </ng-container>
 </div>

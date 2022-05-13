@@ -12,3 +12,8 @@ verify_password:
   path: /game/{joinKey}/verifyPassword
   controller: App\Controller\GameController::verifyPassword
   methods: GET
+
+update_game:
+    path: /game/{id}
+    controller: App\Controller\GameController::updateGame
+    methods: PUT

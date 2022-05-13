@@ -7,22 +7,25 @@ import {GameState} from "../../../enums/gamestate.enum";
 import {GameService} from "../../../services/game.service";
 import {Router} from "@angular/router";
 import {ToastrService} from "ngx-toastr";
-import {animate, state, style, transition, trigger} from "@angular/animations";
 import {SocketService} from "../../../services/socket.service";
 import {UserService} from "../../../services/user.service";
+import {animate, style, transition, trigger} from "@angular/animations";
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.less'],
   animations: [
-    trigger('fadeInOut', [
-      state('void', style({
-        top: 35,
-        opacity: 0
-      })),
-      transition('void <=> *', [animate(1000)])
-    ]),
+    trigger('fade', [
+      transition(':enter', [
+        style({ top: 35, opacity: 0 }),
+        animate('500ms', style({ opacity: 1, top: 0 }))
+      ]),
+      transition(':leave', [
+        style({ top: 0, opacity: 1 }),
+        animate('500ms', style({ opacity: 0, top: 100 }))
+      ]),
+    ])
   ],
 })
 export class HomeComponent implements OnInit {
@@ -30,6 +33,7 @@ export class HomeComponent implements OnInit {
   creationForm: FormGroup;
   imageSource: string;
   loading: boolean;
+  activateFadeOut: boolean = false;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -61,6 +65,8 @@ export class HomeComponent implements OnInit {
   }
 
   createGame(): void {
+    this.activateFadeOut = true;
+
     const creator: Player = {
       userName: this.creationForm.get('username').value,
       image: this.imageSource,
@@ -109,10 +115,12 @@ export class HomeComponent implements OnInit {
             this.router.navigate(['/game'], { queryParams: { key: game.joinKey } });
           },
           error: () => {
+            this.activateFadeOut = false;
             this.loading = false;
             this.toastService.error('Ein Fehler ist beim Erstellen des Spiels aufgetreten..')
           },
           complete: () => {
+            this.activateFadeOut = false;
             this.loading = false;
           }
         })

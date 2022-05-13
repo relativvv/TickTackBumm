@@ -1,5 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Game} from "../../../../models/game.model";
+import {Player} from "../../../../models/player.model";
 
 @Component({
   selector: 'app-ingame',
@@ -9,6 +10,7 @@ import {Game} from "../../../../models/game.model";
 export class IngameComponent implements OnInit {
 
   @Input() game: Game;
+  @Input() player: Player
 
   constructor() { }
 

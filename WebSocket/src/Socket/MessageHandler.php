@@ -126,6 +126,10 @@ class MessageHandler implements MessageComponentInterface {
 
                 $userName = $data->player->userName;
                 $image = $data->player->image;
+                $players = $this->getSerializedPlayers($key);
+                if(count($players) <= 1) {
+                    return;
+                }
 
                 $player = new Player($from->resourceId, $userName, $image, false);
                 $player->setConn($from);

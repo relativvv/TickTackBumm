@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {PlayingCardType} from "../../../../enums/playing-cards.enum";
+import {PlayingCardState, PlayingCardType} from "../../../../enums/playing-cards.enum";
 
 @Component({
   selector: 'app-playing-card',
@@ -8,14 +8,15 @@ import {PlayingCardType} from "../../../../enums/playing-cards.enum";
 })
 export class PlayingCardComponent implements OnInit {
 
-  @Input() playingCardType: PlayingCardType = PlayingCardType.ORIGINAL;
+  state: PlayingCardState = PlayingCardState.HIDDEN;
+  @Input() playingCardType: PlayingCardType = PlayingCardType.GESCHUETTELT;
 
   constructor() { }
 
   ngOnInit(): void {
   }
 
-  private getPlayingCardTypeString() {
+  getPlayingCardTypeString() {
     switch(this.playingCardType) {
       case PlayingCardType.BEKANNT:
         return "Bekannt";

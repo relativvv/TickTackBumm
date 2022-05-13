@@ -25,7 +25,20 @@ class GameRepository extends ServiceEntityRepository
         return $entity;
     }
 
-    public function findGameByJoinKey(string $key): Game {
+    public function findGameByJoinKey(string $key): Game
+    {
         return $this->findOneBy(['joinKey' => $key]);
+    }
+
+    public function findGameById(int $id)
+    {
+        return $this->findOneBy(['id' => $id]);
+    }
+
+    public function updateGame(Game $game)
+    {
+        $this->getEntityManager()->persist($game);
+        $this->getEntityManager()->flush();
+        return $game;
     }
 }

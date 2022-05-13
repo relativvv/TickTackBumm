@@ -1,9 +1,10 @@
 <div class="body">
   <ng-container *ngIf="game && form">
-    <h1>Tick-Tack-Bumm</h1>
-    <mat-card class="container">
+    <h1 [@fadeSingle]="singleState">Tick-Tack-Bumm</h1>
+    <mat-card *ngIf="!removeComponent" @fadeWhole class="container">
       <mat-card>
         <app-player-list
+          [@fadeSingle]="singleState"
           class="container--left-content"
           [players]="game.players"
         ></app-player-list>
@@ -11,10 +12,12 @@
       <mat-card class="container--right-content">
         <div class="container--right-content__buttons">
           <button
+            [@fadeSingle]="singleState"
             class="invite"
             mat-raised-button
           (click)="copyLink()">Spieler einladen <mat-icon>link</mat-icon></button>
           <button
+            [@fadeSingle]="singleState"
             class="start"
             mat-raised-button
             [disabled]="isFormInvalid()"
@@ -26,6 +29,7 @@
 
         <h2>Einstellungen</h2>
         <form
+          [@fadeSingle]="singleState"
           class="container--right-content__settings"
           [formGroup]="form"
         >

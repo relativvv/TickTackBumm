@@ -15,7 +15,8 @@ class GameSerializer
     ) {
     }
 
-    public function deserialize(array $data): Game {
+    public function deserialize(array $data): Game
+    {
         $mustHave = [
             'gameState',
             'minPlayers',

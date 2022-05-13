@@ -29,4 +29,8 @@ export class GameService {
 
     return this.http.get<void>(this.backend + '/game/' + key + '/verifyPassword', { params: httpParams });
   }
+
+  public updateGame(gameId: number, game: Game): Observable<Game> {
+    return this.http.put<Game>(this.backend + '/game/' + gameId, game);
+  }
 }
