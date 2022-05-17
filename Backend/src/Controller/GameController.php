@@ -19,6 +19,9 @@ class GameController extends AbstractController
     ) {
     }
 
+    /**
+     * @throws \JsonException
+     */
     public function createGame(Request $request): JsonResponse
     {
         $data = $this->getData($request);
@@ -61,6 +64,9 @@ class GameController extends AbstractController
         return new JsonResponse($updatedGame->toArray());
     }
 
+    /**
+     * @throws \JsonException
+     */
     private function getData(Request $request): array
     {
         return json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
