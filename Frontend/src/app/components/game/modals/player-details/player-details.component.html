@@ -1,0 +1,20 @@
+<div mat-dialog-content>
+    <div class="container--top-box">
+      <img
+        class="container--top-box__image"
+        alt="profile"
+        [src]="player.image"
+      >
+    </div>
+    <div class="container--bottom-box">
+      <h2>{{ player.userName }}</h2>
+    </div>
+</div>
+
+<div class="actions" mat-dialog-actions>
+  <button
+    mat-raised-button
+    color="warn"
+    (click)="close()"
+  ><mat-icon>close</mat-icon> Schließen</button>
+</div>

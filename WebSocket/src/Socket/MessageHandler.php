@@ -13,14 +13,16 @@ class Player {
     private string $userName;
     private string $image;
     private bool $creator;
+    private int $lives;
     private ?ConnectionInterface $conn;
 
-    public function __construct(string $resourceId, string $userName, string $image, bool $creator)
+    public function __construct(string $resourceId, string $userName, string $image, bool $creator, int $lives = 0)
     {
         $this->resourceId = $resourceId;
         $this->userName = $userName;
         $this->image = $image;
         $this->creator = $creator;
+        $this->lives = $lives;
     }
 
     public function toArray(): array {
@@ -28,7 +30,8 @@ class Player {
             'resourceId' => $this->resourceId,
             'userName' => $this->userName,
             'image' => $this->image,
-            'creator' => $this->creator
+            'creator' => $this->creator,
+            'lives' => $this->lives
         ];
     }
 
@@ -101,7 +104,7 @@ class MessageHandler implements MessageComponentInterface {
                 $image = $data->player->image;
                 $creator = $data->player->creator;
 
-                $player = new Player($from->resourceId, $userName, $image, $creator);
+                $player = new Player($from->resourceId, $userName, $image, $creator, 3);
                 $player->setConn($from);
                 $this->rooms[$key] = [$player];
                 break;
@@ -127,11 +130,12 @@ class MessageHandler implements MessageComponentInterface {
                 $userName = $data->player->userName;
                 $image = $data->player->image;
                 $players = $this->getSerializedPlayers($key);
-                if(count($players) <= 1) {
+
+                if(count($players) < 1) {
                     return;
                 }
 
-                $player = new Player($from->resourceId, $userName, $image, false);
+                $player = new Player($from->resourceId, $userName, $image, false, 3);
                 $player->setConn($from);
                 array_push($this->rooms[$key], $player);
 
@@ -156,11 +160,42 @@ class MessageHandler implements MessageComponentInterface {
                 $this->sendToClient($from, $payload);
                 break;
 
-            case 'updateGame':
+            case 'settingsUpdate':
                 $key = $data->joinKey;
                 $values = $data->values;
 
                 $this->broadcastToAllPlayersInRoom($key, ["type" => "updateSettings", "values" => $this->serializeGame($values)]);
+                break;
+
+            case 'sendMessage':
+                $key = $data->joinKey;
+                $message = $data->msg;
+                $player = new Player($data->player->resourceId, $data->player->userName, $data->player->image, $data->player->creator);
+
+                $payload = [
+                    'type' => 'receiveMessage',
+                    'player' => $player->toArray(),
+                    'message' => $message
+                ];
+
+                $this->broadcastToAllPlayersInRoom($key, $payload, $from);
+                break;
+
+
+
+            // ------------------------------ Game Mechanics ------------------------- //
+            case 'gameUpdate':
+                $key = $data->joinKey;
+                $game = $data->game;
+
+                $payload = [
+                    'type' => 'updateGame',
+                    'game' => $this->serializeGame($game)
+                ];
+                $this->broadcastToAllPlayersInRoom($key, $payload);
+                break;
+
+            case 'answerSubmit':
                 break;
             default:
                 $this->sendToClient($from, []);
@@ -214,13 +249,15 @@ class MessageHandler implements MessageComponentInterface {
     /**
      * @throws JsonException
      */
-    private function broadcastToAllPlayersInRoom(string $roomKey, array $jsonData): void {
+    private function broadcastToAllPlayersInRoom(string $roomKey, array $jsonData, ?ConnectionInterface $current = null): void {
         $connectionInterfaces = [];
         $players = $this->findRoomPlayersByKey($roomKey);
         foreach($players as $player) {
             $connectionInterfaces[] = $player->getConn();
             foreach($connectionInterfaces as $interface) {
-                $this->sendToClient($interface, $jsonData);
+                if($interface->resourceId !== $current->resourceId) {
+                    $this->sendToClient($interface, $jsonData);
+                }
             }
         }
     }
@@ -241,6 +278,7 @@ class MessageHandler implements MessageComponentInterface {
         return [
             'minPlayers' => $item->minPlayers,
             'maxPlayers' => $item->maxPlayers,
+            'gameState' => $this->serializeGameState($item->gameState),
             'minBombTime' => $item->minBombTime,
             'maxBombTime' => $item->maxBombTime,
             'allowKnown' => $item->allowKnown,
@@ -248,7 +286,18 @@ class MessageHandler implements MessageComponentInterface {
             'allowOriginal' => $item->allowOriginal,
             'allowShaked' => $item->allowShaked,
             'allowSetted' => $item->allowSetted,
-            'enableJoker' => $item->enableJoker
+            'enableJoker' => $item->enableJoker,
+            'joinKey' => $item->joinKey,
+            'players' => $this->getSerializedPlayers($item->joinKey),
+            'currentPlayer' => $item->currentPlayer ?? null,
+            'bombTime' => $item->bombTime ?? null
+        ];
+    }
+
+    private function serializeGameState($item): array {
+        return [
+            'id' => $item->id,
+            'name' => $item->name ?? null
         ];
     }
 }

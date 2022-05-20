@@ -20,6 +20,10 @@ import { ChatComponent } from './ingame/chat/chat.component';
 import { GameAreaComponent } from './ingame/game-area/game-area.component';
 import { MessageItemComponent } from './ingame/chat/message-item/message-item.component';
 import {MatChipsModule} from "@angular/material/chips";
+import { PlayerOrderComponent } from './ingame/player-order/player-order.component';
+import { PlayerDetailsComponent } from './modals/player-details/player-details.component';
+import {PlayingCardComponent} from "./ingame/playing-card/playing-card.component";
+import { DeckComponent } from './ingame/deck/deck.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +35,11 @@ import {MatChipsModule} from "@angular/material/chips";
     JoinGameComponent,
     ChatComponent,
     GameAreaComponent,
-    MessageItemComponent
+    MessageItemComponent,
+    PlayerOrderComponent,
+    PlayerDetailsComponent,
+    PlayingCardComponent,
+    DeckComponent
   ],
     imports: [
         CommonModule,

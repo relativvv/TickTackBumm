@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {PlayingCardComponent} from "./playing-card/playing-card.component";
 import {MatIconModule} from "@angular/material/icon";
 import { RulesComponent } from './rules/rules.component';
 import {MatButtonModule} from "@angular/material/button";
@@ -10,11 +9,9 @@ import {MatDialogModule} from "@angular/material/dialog";
 
 @NgModule({
   declarations: [
-    PlayingCardComponent,
     RulesComponent
   ],
   exports: [
-    PlayingCardComponent
   ],
   imports: [
     CommonModule,

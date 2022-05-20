@@ -7,6 +7,8 @@ import {Player} from "../../../../models/player.model";
 import {UserService} from "../../../../services/user.service";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {GameState} from "../../../../enums/gamestate.enum";
+import {GameService} from "../../../../services/game.service";
+import {SocketService} from "../../../../services/socket.service";
 
 @Component({
   selector: 'app-lobby',
@@ -49,7 +51,9 @@ export class LobbyComponent implements OnInit {
     private readonly formBuilder: FormBuilder,
     private readonly clipboard: Clipboard,
     private readonly toastService: ToastrService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly gameService: GameService,
+    private readonly socketService: SocketService
   ) {
   }
 
@@ -78,6 +82,13 @@ export class LobbyComponent implements OnInit {
 
     setTimeout(() => {
       this.game.gameState.id = GameState.INGAME;
+      this.gameService.updateGame(this.game.id, this.game).subscribe(() => {
+        this.socketService.getSocket().send(JSON.stringify({
+          type: 'gameUpdate',
+          joinKey: this.game.joinKey,
+          game: this.game
+        }));
+      });
     }, 500)
   }
 

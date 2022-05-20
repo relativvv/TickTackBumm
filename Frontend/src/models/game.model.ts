@@ -17,9 +17,16 @@ export interface Game {
   enableJoker: boolean;
   password?: string;
   hasPassword: boolean;
+  currentPlayer?: Player;
+  bombTime?: number;
 }
 
 export interface GameState {
   id: number;
   name?: string;
+}
+
+export interface Message {
+  sender: Player;
+  message: string;
 }

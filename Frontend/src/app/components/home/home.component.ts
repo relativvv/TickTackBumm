@@ -117,6 +117,7 @@ export class HomeComponent implements OnInit {
           error: () => {
             this.activateFadeOut = false;
             this.loading = false;
+            this.creationForm.get('valid').setValue(true);
             this.toastService.error('Ein Fehler ist beim Erstellen des Spiels aufgetreten..')
           },
           complete: () => {

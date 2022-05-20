@@ -41,7 +41,6 @@ export class GameComponent implements OnInit, AfterViewInit {
     private readonly toastrService: ToastrService,
     private readonly matDialogService: MatDialog,
     private readonly formBuilder: FormBuilder,
-    private readonly store: Store<AppConfig>,
     private readonly userService: UserService
   ) {
     this.titleService.setTitle('Tick-Tack-Bumm | Spiel');
@@ -69,7 +68,6 @@ export class GameComponent implements OnInit, AfterViewInit {
       })
     ).subscribe((game: Game) => {
       this.game = game;
-      this.game.gameState.id = GameState.INGAME;
 
       const int = setInterval(() => {
         if (this.socketService.getSocket().readyState === WebSocket.OPEN) {
@@ -100,7 +98,7 @@ export class GameComponent implements OnInit, AfterViewInit {
 
         case 'players':
           this.game.players = json.players;
-          if(this.player) {
+          if(this.player && this.game.gameState.id == GameState.LOBBY) {
             const p = this.game.players.find((player: Player) => player.resourceId == this.player.resourceId)
             if(p) {
               let copy = Object.assign({}, this.player);
@@ -127,27 +125,32 @@ export class GameComponent implements OnInit, AfterViewInit {
                 }).afterClosed()
                   .pipe(
                     switchMap(() => {
-                      return this.store.select(selectPlayer);
+                      return this.userService.getPlayer();
                     })
                   ).subscribe((appConfig: AppConfig) => {
                     this.player = appConfig.player;
                   });
               } else {
-                // this.router.navigate(['/']);
-                // this.toastrService.error('Diese Runde läuft bereits.');
+                this.router.navigate(['/']);
+                this.toastrService.error('Diese Runde läuft bereits.');
               }
             } else {
-              // this.router.navigate(['/']);
-              // this.toastrService.error('Diese Runde existiert nicht.');
+              this.router.navigate(['/']);
+              this.toastrService.error('Diese Runde existiert nicht.');
             }
           }
           break;
 
         case 'triggerEnd':
           if(json.end === true) {
-            // this.router.navigate(['/']);
-            // this.toastrService.error('Die Runde ist beendet..')
+            this.router.navigate(['/']);
+            this.toastrService.error('Die Runde ist beendet..')
           }
+          break;
+
+        case 'updateGame':
+          const game = json.game;
+          this.game = game;
           break;
       }
 
@@ -206,7 +209,10 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   private getPlayer(): void {
-    this.store.select(selectPlayer)
+    this.userService.getPlayer()
+      .pipe(
+        take(1)
+      )
       .subscribe((appConfig: AppConfig) => {
         if(appConfig) {
           this.player = appConfig.player;

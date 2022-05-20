@@ -1,6 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {PlayingCardState, PlayingCardType} from "../../../../enums/playing-cards.enum";
+import {PlayingCardType} from "../../../../../enums/playing-cards.enum";
 import {animate, state, style, transition, trigger} from "@angular/animations";
+import {Game} from "../../../../../models/game.model";
+import {Player} from "../../../../../models/player.model";
 
 @Component({
   selector: 'app-playing-card',
@@ -8,25 +10,24 @@ import {animate, state, style, transition, trigger} from "@angular/animations";
   styleUrls: ['./playing-card.component.less'],
   animations: [
     trigger('flipCard', [
-      state('shown', style({
+      state('hidden', style({
         transform: 'rotateY(0deg)'
       })),
-      state('hidden', style({
+      state('shown', style({
         transform: 'rotateY(180deg)'
       })),
       transition('hidden <=> shown', [
-        animate('200ms')
+        animate('400ms')
       ])
     ]),
   ]
 })
 export class PlayingCardComponent implements OnInit {
 
-  animationState = 'hidden';
+  cardState = 'hidden';
   @Input() playingCardType: PlayingCardType = PlayingCardType.GESCHUETTELT;
-  @Input() isStack: boolean = true;
-
-  state: PlayingCardState = PlayingCardState.HIDDEN;
+  @Input() game: Game;
+  @Input() player: Player;
 
   constructor() { }
 
@@ -50,16 +51,8 @@ export class PlayingCardComponent implements OnInit {
   }
 
   flipCard(): void {
-    if(this.state === PlayingCardState.HIDDEN) {
-      this.animationState = 'shown';
-      this.state = PlayingCardState.OPEN;
-    } else if(this.state === PlayingCardState.OPEN) {
-      this.animationState = 'hidden';
-      this.state = PlayingCardState.HIDDEN;
+    if(this.game.currentPlayer.resourceId === this.player.resourceId) {
+      this.cardState === 'hidden' ? this.cardState = 'shown' : this.cardState = 'hidden';
     }
-
-    console.log(this.animationState);
-    console.log(this.state);
   }
-
 }

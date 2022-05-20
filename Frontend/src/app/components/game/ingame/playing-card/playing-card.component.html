@@ -1,0 +1,37 @@
+<div class="container" (click)="flipCard()">
+  <div [@flipCard]="cardState" class="container--card">
+    <div class="container--card__front">
+      <div class="container--card__front__content">
+        <div
+          class="container--card__front__content__head">
+          <div>
+          <ng-container [ngSwitch]="playingCardType">
+            <mat-icon *ngSwitchCase="0">wc</mat-icon>
+            <mat-icon *ngSwitchCase="1">help</mat-icon>
+            <mat-icon *ngSwitchCase="2">dehaze</mat-icon>
+            <mat-icon *ngSwitchCase="3">texture</mat-icon>
+            <mat-icon *ngSwitchCase="4">tab</mat-icon>
+          </ng-container>
+          </div>
+          <h3
+            [class.known]="playingCardType === 0"
+            [class.asked]="playingCardType === 1"
+            [class.original]="playingCardType === 2"
+            [class.shaked]="playingCardType === 3"
+            [class.setted]="playingCardType === 4">{{ getPlayingCardTypeString() }}</h3>
+        </div>
+        <div class="container--card__front__content__body">
+<!--          <ng-content></ng-content>-->
+<!--          <p>Ich bin nur ein Test uns möcht edarstelln wie es aussehen könnte wenn der TExt länger ist</p>-->
+          SE
+        </div>
+      </div>
+    </div>
+    <div class="container--card__back">
+      <div class="container--card__back__content">
+        <img src="../../../../../assets/images/bomb.png" alt="bomb">
+        <h3><b>TickTackBumm</b></h3>
+      </div>
+    </div>
+  </div>
+</div>
