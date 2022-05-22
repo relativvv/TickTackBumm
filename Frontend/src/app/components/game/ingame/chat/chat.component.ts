@@ -16,8 +16,8 @@ export class ChatComponent implements OnInit {
 
   @Input() game: Game;
   @Input() player: Player;
+  @Input() messages: Message[];
 
-  messages: Message[] = [];
   form: FormGroup;
 
   constructor(
@@ -28,7 +28,6 @@ export class ChatComponent implements OnInit {
 
   ngOnInit(): void {
     this.createForm();
-    this.startReceiving();
   }
 
   sendMessage(): void {
@@ -58,19 +57,6 @@ export class ChatComponent implements OnInit {
 
     this.messages.push(messageItem);
     this.form.get('message').patchValue('');
-  }
-
-  private startReceiving(): void {
-    this.socketService.getSocket().onmessage = (e) => {
-      const json = JSON.parse(e.data);
-      if(json.type === 'receiveMessage') {
-        const messageItem: Message = {
-          message: json.message,
-          sender: json.player
-        }
-        this.messages.push(messageItem);
-      }
-    }
   }
 
   private createForm(): void {

@@ -2,20 +2,20 @@ import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {Title} from "@angular/platform-browser";
 import {GameService} from "../../../services/game.service";
-import {Game} from "../../../models/game.model";
+import {Game, Message} from "../../../models/game.model";
 import {GameState} from "../../../enums/gamestate.enum";
 import {SocketService} from "../../../services/socket.service";
-import {debounceTime, distinctUntilChanged, pairwise, startWith, switchMap, take} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, switchMap, take} from "rxjs/operators";
 import {ToastrService} from "ngx-toastr";
 import {MatDialog} from "@angular/material/dialog";
 import {JoinGameComponent} from "./lobby/modals/join-game/join-game.component";
-import {combineLatest, EMPTY, NEVER, of} from "rxjs";
+import {NEVER} from "rxjs";
 import {UserService} from "../../../services/user.service";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {selectPlayer} from "../../../core/store/player/player.selectors";
 import {Player} from "../../../models/player.model";
-import {Store} from "@ngrx/store";
 import {AppConfig} from "../../../models/appconfig.model";
+import {GameStep} from "../../../enums/gamestep.enum";
+import {DeckState, PlayingCardState} from "../../../enums/playing-cards.enum";
 
 @Component({
   selector: 'app-game',
@@ -24,6 +24,9 @@ import {AppConfig} from "../../../models/appconfig.model";
 })
 export class GameComponent implements OnInit, AfterViewInit {
 
+  cardState = PlayingCardState.HIDDEN;
+  deckState = DeckState.NOT_PULLED;
+
   LOBBY = GameState.LOBBY;
   INGAME = GameState.INGAME;
   END = GameState.END;
@@ -31,6 +34,8 @@ export class GameComponent implements OnInit, AfterViewInit {
   game: Game;
   lobbyForm: FormGroup
   player: Player;
+
+  messages = [];
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -68,6 +73,7 @@ export class GameComponent implements OnInit, AfterViewInit {
       })
     ).subscribe((game: Game) => {
       this.game = game;
+      this.game.gameStep = GameStep.PULL_CARD;
 
       const int = setInterval(() => {
         if (this.socketService.getSocket().readyState === WebSocket.OPEN) {
@@ -91,6 +97,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   private startListening(): void {
     this.socketService.getSocket().onmessage = (e) => {
       const json = JSON.parse(e.data);
+
       switch(json.type) {
         case 'updateSettings':
           this.lobbyForm.setValue(json.values, { emitEvent: false });
@@ -148,8 +155,25 @@ export class GameComponent implements OnInit, AfterViewInit {
           }
           break;
 
+        case 'receiveMessage':
+          const messageItem: Message = {
+            message: json.message,
+            sender: json.player
+          }
+          this.messages.push(messageItem);
+          break;
+
         case 'updateGame':
-          const game = json.game;
+          const game: Game = json.game;
+          if(game.gameStep !== this.game.gameStep) {
+
+            if(this.game.gameStep === GameStep.PULL_CARD) {
+              this.deckState = DeckState.PULLED;
+            } else if(this.game.gameStep === GameStep.TURN_CARD) {
+              this.cardState = PlayingCardState.OPEN;
+            }
+          }
+
           this.game = game;
           break;
       }
@@ -168,7 +192,7 @@ export class GameComponent implements OnInit, AfterViewInit {
       enableJoker: [true, { updateOn: 'change' }],
       minBombTime: [10, {validators: [Validators.required, Validators.min(1)], updateOn: 'change'}],
       maxBombTime: [50, {validators: [Validators.required, Validators.max(999)], updateOn: 'change'}],
-      minPlayers: [3, {validators: [Validators.required, Validators.min(3)], updateOn: 'change'}],
+      minPlayers: [1, {validators: [Validators.required, Validators.min(1)], updateOn: 'change'}],
       maxPlayers: [8, {validators: [Validators.required, Validators.max(16)], updateOn: 'change'}],
     });
 

@@ -7,6 +7,12 @@ export enum PlayingCardType {
 }
 
 export enum PlayingCardState {
-  OPEN = 0,
-  HIDDEN = 1
+  OPEN = 'shown',
+  HIDDEN = 'hidden'
 }
+
+export enum DeckState {
+  PULLED = 'pulled',
+  NOT_PULLED = 'notPulled'
+}
+

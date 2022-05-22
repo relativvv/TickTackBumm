@@ -3,6 +3,8 @@
     class="container--game-area"
     [game]="game"
     [player]="player"
+    [playingCardState]="cardState"
+    [deckState]="deckState"
     (doTurnEvent)="doTurn()"
   ></app-game-area>
   <app-chat

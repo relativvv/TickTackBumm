@@ -19,6 +19,8 @@ export interface Game {
   hasPassword: boolean;
   currentPlayer?: Player;
   bombTime?: number;
+  round?: number;
+  gameStep?: number;
 }
 
 export interface GameState {

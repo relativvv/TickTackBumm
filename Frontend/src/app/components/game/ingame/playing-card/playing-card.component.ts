@@ -1,8 +1,10 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {PlayingCardType} from "../../../../../enums/playing-cards.enum";
+import {PlayingCardState, PlayingCardType} from "../../../../../enums/playing-cards.enum";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {Game} from "../../../../../models/game.model";
 import {Player} from "../../../../../models/player.model";
+import {GameStep} from "../../../../../enums/gamestep.enum";
+import {GameService} from "../../../../../services/game.service";
 
 @Component({
   selector: 'app-playing-card',
@@ -24,12 +26,14 @@ import {Player} from "../../../../../models/player.model";
 })
 export class PlayingCardComponent implements OnInit {
 
-  cardState = 'hidden';
   @Input() playingCardType: PlayingCardType = PlayingCardType.GESCHUETTELT;
   @Input() game: Game;
   @Input() player: Player;
+  @Input() cardState: string;
 
-  constructor() { }
+  constructor(
+    private readonly gameService: GameService
+  ) { }
 
   ngOnInit(): void {
   }
@@ -51,8 +55,10 @@ export class PlayingCardComponent implements OnInit {
   }
 
   flipCard(): void {
-    if(this.game.currentPlayer.resourceId === this.player.resourceId) {
-      this.cardState === 'hidden' ? this.cardState = 'shown' : this.cardState = 'hidden';
+    if(this.game.currentPlayer.resourceId == this.player.resourceId && this.game.gameStep === GameStep.TURN_CARD) {
+      this.cardState === PlayingCardState.HIDDEN ? this.cardState = PlayingCardState.OPEN : this.cardState = PlayingCardState.HIDDEN;
+      this.game.gameStep = GameStep.BOMB_TICKING;
+      this.gameService.sendGameUpdate(this.game);
     }
   }
 }

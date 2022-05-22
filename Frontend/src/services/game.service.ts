@@ -3,6 +3,7 @@ import {HttpClient, HttpParams} from "@angular/common/http";
 import {Game} from "../models/game.model";
 import {Observable} from "rxjs";
 import {environment} from "../environments/environment";
+import {SocketService} from "./socket.service";
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,7 @@ export class GameService {
 
   constructor(
     private readonly http: HttpClient,
+    private readonly socketService: SocketService
   ) { }
 
   public getGameByJoinKey(key: string): Observable<Game> {
@@ -32,5 +34,13 @@ export class GameService {
 
   public updateGame(gameId: number, game: Game): Observable<Game> {
     return this.http.put<Game>(this.backend + '/game/' + gameId, game);
+  }
+
+  public sendGameUpdate(game: Game): void {
+    this.socketService.getSocket().send(JSON.stringify({
+      type: 'gameUpdate',
+      joinKey: game.joinKey,
+      game: game
+    }));
   }
 }
