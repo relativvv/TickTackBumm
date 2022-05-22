@@ -1,0 +1,47 @@
+<div mat-dialog-content>
+  <form
+    *ngIf="form"
+    class="container"
+    [formGroup]="form">
+
+    <div class="container--top-box">
+      <button
+        type="button"
+        id="refresh-profile"
+        class="container--top-box__refresh-button"
+        mat-fab
+        (click)="setRandomProfileImage()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      <img
+        class="container--top-box__image"
+        alt="profile"
+        [src]="imageSource"
+      >
+    </div>
+    <div class="container--bottom-box">
+      <mat-form-field appearance="standard">
+        <mat-label>Wie möchtest Du heißen?</mat-label>
+        <input formControlName="username" maxlength="14" matInput>
+        <mat-icon matSuffix>person</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field *ngIf="game.hasPassword" appearance="standard">
+        <mat-label>Bitte gebe das Passwort ein..</mat-label>
+        <input formControlName="password" matInput>
+        <mat-icon matSuffix>fingerprint</mat-icon>
+      </mat-form-field>
+    </div>
+
+  </form>
+</div>
+
+<div class="actions" mat-dialog-actions>
+  <button
+    class="join-button"
+    mat-raised-button
+    [disabled]="form.invalid"
+    [class.disabled]="form.invalid"
+    (click)="joinRound()"
+  >Betreten</button>
+</div>

@@ -1,48 +1,56 @@
-<div *ngIf="creationForm" class="container">
+<div *ngIf="creationForm && !loading; else showLoading" id="main-container" class="container">
 
-  <h1>Tick-Tack-Bumm</h1>
+  <h1 @fade *ngIf="!activateFadeOut">Tick-Tack-Bumm</h1>
 
-  <form [formGroup]="creationForm" class="container--creation-box">
-    <div class="container--creation-box__left-container">
-      <button
-        type="button"
-        id="refresh-profile"
-        class="container--creation-box__left-container__reload-image"
-        mat-fab
-        (click)="setRandomProfileImage()">
-        <mat-icon>refresh</mat-icon>
-      </button>
-      <img
-        class="container--creation-box__left-container__image"
-        alt="profile"
-        [src]="imageSource"
-      >
-    </div>
-    <div class="container--creation-box__right-container">
-        <mat-form-field appearance="standard">
-          <mat-label>Wie möchtest Du heißen?</mat-label>
-          <input formControlName="username" matInput>
-          <mat-icon matSuffix>person</mat-icon>
-        </mat-form-field>
-
-      <div class="container--creation-box__right-container__password">
-        <mat-checkbox formControlName="setPassword"></mat-checkbox>
-        <mat-form-field appearance="standard">
-          <mat-label>Willst Du ein Passwort setzen?</mat-label>
-          <input formControlName="passwordValue" matInput>
-          <mat-icon matSuffix>fingerprint</mat-icon>
-        </mat-form-field>
+    <form @fade *ngIf="!activateFadeOut" [formGroup]="creationForm" class="container--creation-box">
+      <div class="container--creation-box__left-container">
+        <button
+          type="button"
+          id="refresh-profile"
+          class="container--creation-box__left-container__reload-image"
+          mat-fab
+          (click)="setRandomProfileImage()">
+          <mat-icon>refresh</mat-icon>
+        </button>
+        <img
+          class="container--creation-box__left-container__image"
+          alt="profile"
+          [src]="imageSource"
+        >
       </div>
+      <div class="container--creation-box__right-container">
+          <mat-form-field appearance="standard">
+            <mat-label>Wie möchtest Du heißen?</mat-label>
+            <input formControlName="username" maxlength="14" matInput>
+            <mat-icon matSuffix>person</mat-icon>
+          </mat-form-field>
 
-      <button
-        class="container--creation-box__right-container__create-button"
-        mat-raised-button
-        [disabled]="creationForm.invalid"
-        [class.disabled]="creationForm.invalid">
-        <mat-icon>play_arrow</mat-icon>
-        Spiel erstellen
-      </button>
+        <div class="container--creation-box__right-container__password">
+          <mat-checkbox formControlName="setPassword"></mat-checkbox>
+          <mat-form-field appearance="standard">
+            <mat-label>Willst Du ein Passwort setzen?</mat-label>
+            <input formControlName="passwordValue" matInput>
+            <mat-icon matSuffix>fingerprint</mat-icon>
+          </mat-form-field>
+        </div>
 
-    </div>
-  </form>
-</div>
+        <button
+          class="container--creation-box__right-container__create-button"
+          mat-raised-button
+          type="button"
+          [disabled]="formInvalid()"
+          [class.disabled]="formInvalid()"
+          (click)="createGame()">
+          <mat-icon>play_arrow</mat-icon>
+          Spiel erstellen
+        </button>
+
+      </div>
+    </form>
+  </div>
+
+<ng-template #showLoading>
+  <div class="loading-container">
+    <mat-spinner color="warn"></mat-spinner>
+  </div>
+</ng-template>

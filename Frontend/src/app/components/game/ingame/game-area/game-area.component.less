@@ -1,0 +1,88 @@
+:host {
+  .container:hover {
+    cursor: grab;
+  }
+
+  .container {
+    position: relative;
+    height: 800px;
+    margin-top: 44px;
+    background-color: #111111;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    &--players {
+      padding-bottom: 28px;
+      border-bottom: solid 1px white;
+      margin: 24px;
+    }
+
+    &--game {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 80px;
+      padding: 28px;
+      height: 55%;
+      position: relative;
+
+      &__doubt {
+        background-image: linear-gradient(to bottom right, #ce8d01, #ffdb1b);
+        flex: 0.4;
+        float: right;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        height: 48px;
+      }
+
+      &__deck, &__card {
+        transition: 0.3s;
+        position: relative;
+      }
+
+      &__deck:hover {
+        transform: scale(1.03);
+      }
+
+      &__card:hover {
+        transform: scale(1.03);
+      }
+    }
+
+    &--submit-message {
+      &__input-container {
+        position: absolute;
+        bottom: 62px;
+        display: flex;
+        gap: 64px;
+        justify-content: center;
+        width: 100%;
+
+        button {
+          width: 200px;
+          background-image: linear-gradient(to bottom right, #29ff6c, #00ff0d);
+          color: black;
+        }
+
+        &__input {
+          border: none;
+          padding: 4px;
+          box-shadow: none;
+          width: 50%;
+          height: 40px;
+          border-radius: 8px;
+          font-size: 24px;
+          text-align: center;
+        }
+      }
+    }
+  }
+
+  .disabled {
+    background-image: linear-gradient(gray, darkgray) !important;
+  }
+}

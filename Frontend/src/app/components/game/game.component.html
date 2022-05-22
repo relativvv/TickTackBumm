@@ -1,0 +1,15 @@
+<ng-container *ngIf="game && game.players">
+  <ng-container [ngSwitch]="game.gameState.id">
+    <app-lobby
+      *ngSwitchCase="LOBBY"
+      [game]="game"
+      [player]="player"
+      [form]="lobbyForm"
+    ></app-lobby>
+    <app-ingame
+      *ngSwitchCase="INGAME"
+      [game]="game"
+      [player]="player"
+    ></app-ingame>
+  </ng-container>
+</ng-container>

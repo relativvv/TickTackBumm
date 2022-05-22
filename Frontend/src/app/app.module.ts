@@ -8,19 +8,26 @@ import { HomeComponent } from './components/home/home.component';
 import {MatSidenavModule} from "@angular/material/sidenav";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
-import { PlayingCardComponent } from './components/shared/playing-card/playing-card.component';
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {ReactiveFormsModule} from "@angular/forms";
+import {GameModule} from "./components/game/game.module";
+import {CommonModule} from "@angular/common";
+import {SharedModule} from "./components/shared/shared.module";
+import {ToastrModule} from "ngx-toastr";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import { HttpClientModule } from "@angular/common/http";
+import {StoreModule} from "@ngrx/store";
+import {playerReducer} from "../core/store/player/player.reducer";
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    PlayingCardComponent
   ],
   imports: [
+    CommonModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
@@ -30,7 +37,13 @@ import {ReactiveFormsModule} from "@angular/forms";
     MatFormFieldModule,
     MatInputModule,
     MatCheckboxModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    GameModule,
+    SharedModule,
+    MatProgressSpinnerModule,
+    HttpClientModule,
+    ToastrModule.forRoot(),
+    StoreModule.forRoot({ player: playerReducer })
   ],
   providers: [],
   bootstrap: [
