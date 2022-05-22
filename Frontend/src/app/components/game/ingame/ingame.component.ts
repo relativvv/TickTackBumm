@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Game} from "../../../../models/game.model";
+import {Game, Message} from "../../../../models/game.model";
 import {Player} from "../../../../models/player.model";
 import {SocketService} from "../../../../services/socket.service";
 import {Router} from "@angular/router";
@@ -14,6 +14,10 @@ export class IngameComponent implements OnInit {
 
   @Input() game: Game;
   @Input() player: Player
+  @Input() messages: Message[];
+
+  @Input() cardState: string;
+  @Input() deckState: string;
 
   constructor(
     private readonly socketService: SocketService,
@@ -27,7 +31,6 @@ export class IngameComponent implements OnInit {
       this.toastrService.error('Die Runde ist beendet..')
     }
 
-    this.listenToSocket();
     this.game.currentPlayer = this.game.players[0];
   }
 
@@ -40,15 +43,4 @@ export class IngameComponent implements OnInit {
       this.game.currentPlayer = this.game.players[0];
     }, 300)
   }
-
-  private listenToSocket(): void {
-    this.socketService.getSocket().onmessage = (e) => {
-      const json = JSON.parse(e.data);
-
-      switch(json.type) {
-
-      }
-    }
-  }
-
 }

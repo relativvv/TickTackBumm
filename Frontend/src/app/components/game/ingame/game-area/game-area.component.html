@@ -3,13 +3,18 @@
     <app-player-order [players]="game.players"></app-player-order>
   </div>
   <div class="container--game">
-    <app-deck class="container--game__deck"></app-deck>
-    <app-playing-card @card class="container--game__card"></app-playing-card>
+    <app-deck class="container--game__deck" (click)="pullCard()"></app-deck>
+    <app-playing-card [@card]="deckState"
+                      class="container--game__card"
+                      [game]="game"
+                      [player]="player"
+                      [cardState]="playingCardState"
+    ></app-playing-card>
     <button
       class="container--game__doubt"
       mat-raised-button
-      [disabled]="game.currentPlayer.resourceId !== player.resourceId"
-      [class.disabled]="game.currentPlayer.resourceId !== player.resourceId">
+      [disabled]="game.currentPlayer.resourceId === player.resourceId"
+      [class.disabled]="game.currentPlayer.resourceId === player.resourceId">
       <mat-icon>format_clear</mat-icon>
       Lösung des Spielers anzweifeln
     </button>
@@ -23,7 +28,6 @@
         class="container--submit-message__input-container__input"
         type="text"
         formControlName="answer"
-        [disabled]="game.currentPlayer.resourceId !== player.resourceId"
       >
       <button
         mat-raised-button

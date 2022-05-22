@@ -9,6 +9,7 @@ import {animate, state, style, transition, trigger} from "@angular/animations";
 import {GameState} from "../../../../enums/gamestate.enum";
 import {GameService} from "../../../../services/game.service";
 import {SocketService} from "../../../../services/socket.service";
+import {GameStep} from "../../../../enums/gamestep.enum";
 
 @Component({
   selector: 'app-lobby',
@@ -82,12 +83,11 @@ export class LobbyComponent implements OnInit {
 
     setTimeout(() => {
       this.game.gameState.id = GameState.INGAME;
+      this.game.gameStep = GameStep.PULL_CARD;
+      this.game.round = 1;
+
       this.gameService.updateGame(this.game.id, this.game).subscribe(() => {
-        this.socketService.getSocket().send(JSON.stringify({
-          type: 'gameUpdate',
-          joinKey: this.game.joinKey,
-          game: this.game
-        }));
+        this.gameService.sendGameUpdate(this.game);
       });
     }, 500)
   }
