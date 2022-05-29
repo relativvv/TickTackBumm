@@ -1,27 +1,27 @@
-<div @fadeWhole class="container">
-  <mat-chip-list>
-    <ng-container *ngFor="let player of players; let last=last">
-      <div class="player-item">
-        <mat-chip @fadeWhole [style]="'color: ' + textColor + '; background-color: ' + getRandomColorByName(player.userName)" (click)="openPlayerDetails(player)">
-          <mat-chip-avatar>
-            <img [src]="player.image" alt="player_image">
-          </mat-chip-avatar>
-          {{ player.userName }}
-        </mat-chip>
-        <div class="health">
-          <mat-icon
-            [class.health__has]="player.lives >= 1"
-            [class.health__has-not]="player.lives < 1"
-          >favorite</mat-icon>
-          <mat-icon
-            [class.health__has]="player.lives >= 2"
-            [class.health__has-not]="player.lives < 2">favorite</mat-icon>
-          <mat-icon
-            [class.health__has]="player.lives === 3"
-            [class.health__has-not]="player.lives < 3">favorite</mat-icon>
-        </div>
-      </div>
-      <mat-icon *ngIf="!last">arrow_forward</mat-icon>
-    </ng-container>
-  </mat-chip-list>
-</div>
+<!--<div class="container">-->
+<!--  <mat-chip-list>-->
+<!--    <ng-container *ngFor="let player of game.players; let last=last">-->
+<!--      <div class="player-item">-->
+<!--        <mat-chip @fadeWhole [style]="'color: ' + getTextColor(player.userName) + '; background-color: ' + getRandomColorByName(player.userName)" (click)="openPlayerDetails(player)">-->
+<!--          <mat-chip-avatar>-->
+<!--            <img [src]="player.image" alt="player_image">-->
+<!--          </mat-chip-avatar>-->
+<!--          {{ player.userName }}-->
+<!--        </mat-chip>-->
+<!--        <div class="health">-->
+<!--          <mat-icon-->
+<!--            [class.health__has]="player.lives >= 1"-->
+<!--            [class.health__has-not]="player.lives < 1"-->
+<!--          >favorite</mat-icon>-->
+<!--          <mat-icon-->
+<!--            [class.health__has]="player.lives >= 2"-->
+<!--            [class.health__has-not]="player.lives < 2">favorite</mat-icon>-->
+<!--          <mat-icon-->
+<!--            [class.health__has]="player.lives === 3"-->
+<!--            [class.health__has-not]="player.lives < 3">favorite</mat-icon>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <mat-icon *ngIf="!last">arrow_forward</mat-icon>-->
+<!--    </ng-container>-->
+<!--  </mat-chip-list>-->
+<!--</div>-->

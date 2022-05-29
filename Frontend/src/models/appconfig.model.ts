@@ -3,4 +3,5 @@ import {Game} from "./game.model";
 
 export interface AppConfig {
   player: Player;
+  game: Game;
 }

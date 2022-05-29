@@ -1,8 +1,13 @@
-<h2>Spieler ({{ players.length }})</h2>
-<div class="list-items">
-  <app-player-item
-    *ngFor="let player of players; let last=last"
-    [player]="player">
-    <hr *ngIf="!last" />
-  </app-player-item>
-</div>
+<ng-container *ngIf="players; else loading">
+  <h2>Spieler ({{ players.length }})</h2>
+  <div class="list-items">
+    <app-player-item
+      *ngFor="let player of players; let last=last"
+      [player]="player">
+      <hr *ngIf="!last" />
+    </app-player-item>
+  </div>
+</ng-container>
+<ng-template #loading>
+  <mat-spinner></mat-spinner>
+</ng-template>

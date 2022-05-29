@@ -1,42 +1,57 @@
-<div class="container">
-  <div class="container--players">
-    <app-player-order [players]="game.players"></app-player-order>
-  </div>
-  <div class="container--game">
-    <app-deck class="container--game__deck" (click)="pullCard()"></app-deck>
-    <app-playing-card [@card]="deckState"
-                      class="container--game__card"
-                      [game]="game"
-                      [player]="player"
-                      [cardState]="playingCardState"
-    ></app-playing-card>
-    <button
-      class="container--game__doubt"
-      mat-raised-button
-      [disabled]="game.currentPlayer.resourceId === player.resourceId"
-      [class.disabled]="game.currentPlayer.resourceId === player.resourceId">
-      <mat-icon>format_clear</mat-icon>
-      Lösung des Spielers anzweifeln
-    </button>
-  </div>
-  <div class="container--submit-message">
-    <form
-      class="container--submit-message__input-container"
-      [formGroup]="form"
-    >
-      <input
-        class="container--submit-message__input-container__input"
-        type="text"
-        formControlName="answer"
-      >
-      <button
-        mat-raised-button
-        type="button"
-        [disabled]="form.invalid || game.currentPlayer.resourceId !== player.resourceId"
-        [class.disabled]="form.invalid || game.currentPlayer.resourceId !== player.resourceId"
-        (click)="doTurn()"
-      >Absenden <mat-icon>check</mat-icon>
-      </button>
-    </form>
-  </div>
-</div>
+<!--<div class="container">-->
+<!--  <div class="container&#45;&#45;players">-->
+<!--    <app-player-order *ngIf="game.players" [game]="game"></app-player-order>-->
+<!--  </div>-->
+<!--  <div class="container&#45;&#45;game">-->
+<!--    <app-deck class="container&#45;&#45;game__deck" (click)="pullCard()"></app-deck>-->
+<!--    <app-playing-card-->
+<!--      *ngIf="game.currentCard"-->
+<!--      [@card]="game.deckState"-->
+<!--      class="container&#45;&#45;game__card"-->
+<!--      [game]="game"-->
+<!--      [player]="player"-->
+<!--      [cardState]="game.cardState"-->
+<!--    ></app-playing-card>-->
+<!--    <button-->
+<!--      class="container&#45;&#45;game__doubt"-->
+<!--      mat-raised-button-->
+<!--      [disabled]="!game.currentPlayer"-->
+<!--      [class.disabled]="!game.currentPlayer">-->
+<!--      <mat-icon>format_clear</mat-icon>-->
+<!--      Lösung des Spielers anzweifeln-->
+<!--    </button>-->
+<!--    <div class="container&#45;&#45;game&#45;&#45;info-container">-->
+<!--      <ngx-typed-js class="container&#45;&#45;game&#45;&#45;info-container__info"-->
+<!--                    [showCursor]="false"-->
+<!--                    [typeSpeed]="14"-->
+<!--                    [strings]="[game.helpString ?? '']">-->
+<!--        <h2 class="typing"></h2>-->
+<!--      </ngx-typed-js>-->
+<!--      <div class="container&#45;&#45;game&#45;&#45;info-container&#45;&#45;image-container">-->
+<!--        <img class="container&#45;&#45;game&#45;&#45;info-container&#45;&#45;image-container__image" src="assets/images/bomb_figure.png" alt="bomb_figure">-->
+<!--        <h4 class="container&#45;&#45;game&#45;&#45;info-container&#45;&#45;image-container__image-text">Mike</h4>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--  <div class="container&#45;&#45;submit-message">-->
+<!--    <form-->
+<!--      *ngIf="gameAreaForm"-->
+<!--      class="container&#45;&#45;submit-message__input-container"-->
+<!--      [formGroup]="gameAreaForm"-->
+<!--    >-->
+<!--      <input-->
+<!--        class="container&#45;&#45;submit-message__input-container__input"-->
+<!--        type="text"-->
+<!--        formControlName="answer"-->
+<!--      >-->
+<!--      <button-->
+<!--        mat-raised-button-->
+<!--        type="button"-->
+<!--        [disabled]="gameAreaForm.invalid ||!game.currentPlayer || game.currentPlayer.resourceId !== player.resourceId"-->
+<!--        [class.disabled]="gameAreaForm.invalid || !game.currentPlayer || game.currentPlayer.resourceId !== player.resourceId"-->
+<!--        (click)="doTurn()"-->
+<!--      >Absenden <mat-icon>check</mat-icon>-->
+<!--      </button>-->
+<!--    </form>-->
+<!--  </div>-->
+<!--</div>-->

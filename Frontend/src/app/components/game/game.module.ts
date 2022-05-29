@@ -24,6 +24,9 @@ import { PlayerOrderComponent } from './ingame/player-order/player-order.compone
 import { PlayerDetailsComponent } from './modals/player-details/player-details.component';
 import {PlayingCardComponent} from "./ingame/playing-card/playing-card.component";
 import { DeckComponent } from './ingame/deck/deck.component';
+import {NgxTypedJsModule} from "ngx-typed-js";
+import { StartingCountdownComponent } from './lobby/starting-countdown/starting-countdown.component';
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 
 @NgModule({
   declarations: [
@@ -39,7 +42,8 @@ import { DeckComponent } from './ingame/deck/deck.component';
     PlayerOrderComponent,
     PlayerDetailsComponent,
     PlayingCardComponent,
-    DeckComponent
+    DeckComponent,
+    StartingCountdownComponent
   ],
     imports: [
         CommonModule,
@@ -53,7 +57,9 @@ import { DeckComponent } from './ingame/deck/deck.component';
         MatDialogModule,
         MatTooltipModule,
         SharedModule,
-        MatChipsModule
+        MatChipsModule,
+        NgxTypedJsModule,
+        MatProgressSpinnerModule
     ]
 })
 export class GameModule { }

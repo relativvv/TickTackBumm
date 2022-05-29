@@ -1,3 +1,4 @@
+<app-starting-countdown *ngIf="startTriggered" [timer]="timer"></app-starting-countdown>
 <div class="body">
   <ng-container *ngIf="game && form">
     <h1 [@fadeSingle]="singleState">Tick-Tack-Bumm</h1>
@@ -6,7 +7,6 @@
         <app-player-list
           [@fadeSingle]="singleState"
           class="container--left-content"
-          [players]="game.players"
         ></app-player-list>
       </mat-card>
       <mat-card class="container--right-content">

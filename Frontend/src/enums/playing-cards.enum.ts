@@ -1,9 +1,10 @@
 export enum PlayingCardType {
-  BEKANNT = 0,
-  GEFRAGT = 1,
-  ORIGINAL = 2,
-  GESCHUETTELT = 3,
-  ANGESETZT = 4
+  BEKANNT = 1,
+  GEFRAGT = 2,
+  ANGESETZT = 3,
+  GESCHUETTELT = 4,
+  ORIGINAL = 5,
+  JOKER = 6
 }
 
 export enum PlayingCardState {

@@ -1,6 +1,7 @@
 <?php
 namespace App\Socket;
 
+use App\Socket\Entity\Card;
 use Exception;
 use JsonException;
 use Ratchet\ConnectionInterface;
@@ -106,7 +107,7 @@ class MessageHandler implements MessageComponentInterface {
                 $key = $data->joinKey;
                 $values = $data->values;
 
-                $this->webSocketService->broadcastToAllPlayersInRoom($key, ["type" => "updateSettings", "values" => $this->serializeGame($values)]);
+                $this->broadcastToAllPlayersInRoom($key, ["type" => "updateSettings", "values" => $this->serializeGame($values)]);
                 break;
 
             case 'sendMessage':
@@ -118,6 +119,15 @@ class MessageHandler implements MessageComponentInterface {
                     'type' => 'receiveMessage',
                     'player' => $player->toArray(),
                     'message' => $message
+                ];
+
+                $this->broadcastToAllPlayersInRoom($key, $payload, $from);
+                break;
+
+            case 'startCountdown':
+                $key = $data->joinKey;
+                $payload = [
+                    'type' => 'countdownStarted',
                 ];
 
                 $this->broadcastToAllPlayersInRoom($key, $payload, $from);
@@ -138,7 +148,75 @@ class MessageHandler implements MessageComponentInterface {
                 $this->broadcastToAllPlayersInRoom($key, $payload);
                 break;
 
-            case 'answerSubmit':
+            case 'updateCard':
+                $key = $data->joinKey;
+                $game = $data->game;
+
+                $card = $this->getNewCard();
+                $game->currentCard = $card;
+
+                $payload = [
+                    'type' => 'updateGame',
+                    'game' => $this->serializeGame($game)
+                ];
+
+                print_r($payload);
+
+                $this->broadcastToAllPlayersInRoom($key, $payload);
+                break;
+
+            case 'doTurn':
+                $key = $data->joinKey;
+                $game = $data->game;
+                $shift = $data->playerShift;
+
+                $game->currentPlayer = $game->players[0];
+                $game->players[] = $shift;
+
+                $game->helpString = $game->currentPlayer->userName . ' ist dran!';
+
+                $payload = [
+                    'type' => 'updateGame',
+                    'game' => $this->serializeGame($game)
+                ];
+
+                $this->broadcastToAllPlayersInRoom($key, $payload);
+                $this->broadcastToAllPlayersInRoom($key, ['players' => $game->players, 'type' => 'players']);
+                break;
+
+            case 'startBomb':
+                $key = $data->joinKey;
+                $minBombTime = $data->minBombTime;
+                $maxBombTime = $data->maxBombTime;
+                $time = random_int($minBombTime, $maxBombTime);
+
+                $payload = [
+                    'type' => 'bombStarted',
+                    'timer' => $time
+                ];
+                $this->broadcastToAllPlayersInRoom($key, $payload);
+                break;
+
+            case 'explodeBomb':
+                $key = $data->joinKey;
+                $game = $data->game;
+
+                $game->currentPlayer->lives--;
+                foreach($game->players as $playerKey => $player) {
+                    if($player->resourceId === $game->currentPlayer->resourceId) {
+                        unset($game->players[$playerKey]);
+                    }
+                }
+                array_unshift($game->players, $game->currentPlayer);
+
+                $payload = [
+                    'type' => 'bombExploded',
+                    'currentPlayer' => $game->currentPlayer,
+                    'players' => $game->players
+                ];
+
+                $this->broadcastToAllPlayersInRoom($key, $payload);
+                $this->broadcastToAllPlayersInRoom($key, ['players' => $game->players, 'type' => 'players']);
                 break;
             default:
                 $this->sendToClient($from, []);
@@ -197,7 +275,6 @@ class MessageHandler implements MessageComponentInterface {
         $players = $this->findRoomPlayersByKey($roomKey);
         foreach($players as $player) {
             if(!$current || ($player->getConn()->resourceId !== $current->resourceId)) {
-                echo " sended ";
                 $this->sendToClient($player->getConn(), $jsonData);
             }
         }
@@ -213,6 +290,7 @@ class MessageHandler implements MessageComponentInterface {
             $currentPlayer = new SocketPlayer($item->currentPlayer->resourceId, $item->currentPlayer->userName, $item->currentPlayer->image, $item->currentPlayer->creator, $item->currentPlayer->lives);
         }
         return [
+            'id' => $item->id,
             'minPlayers' => $item->minPlayers,
             'maxPlayers' => $item->maxPlayers,
             'gameState' => $this->serializeGameState($item->gameState),
@@ -229,7 +307,11 @@ class MessageHandler implements MessageComponentInterface {
             'currentPlayer' => $currentPlayer?->toArray(),
             'bombTime' => $item->bombTime ?? null,
             'round' => $item->round ?? null,
-            'gameStep' => $item->gameStep ?? null
+            'gameStep' => $item->gameStep ?? null,
+            'helpString' => $item->helpString ?? null,
+            'currentCard' => $item->currentCard ?? null,
+            'cardState' => $item->cardState ?? 'hidden',
+            'deckState' => $item->deckState ?? 'notPulled'
         ];
     }
 
@@ -249,5 +331,10 @@ class MessageHandler implements MessageComponentInterface {
             return $serializedPlayers;
         }
         return [];
+    }
+
+    private function getNewCard(): object {
+        $result = file_get_contents("http://localhost:8000/card", false);
+        return json_decode($result);
     }
 }

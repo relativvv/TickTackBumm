@@ -1,11 +1,12 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {PlayingCard} from "../../../../../models/card.model";
 import {Game} from "../../../../../models/game.model";
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup} from "@angular/forms";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {Player} from "../../../../../models/player.model";
 import {GameStep} from "../../../../../enums/gamestep.enum";
 import {GameService} from "../../../../../services/game.service";
+import {DeckState} from "../../../../../enums/playing-cards.enum";
 
 @Component({
   selector: 'app-game-area',
@@ -28,13 +29,7 @@ import {GameService} from "../../../../../services/game.service";
 export class GameAreaComponent implements OnInit {
 
   @Input() playingCard: PlayingCard;
-  @Input() game: Game;
-  @Input() player: Player;
-
-  @Input() deckState: string;
-  @Input() playingCardState: string;
-
-  form: FormGroup;
+  @Input() gameAreaForm: FormGroup;
 
   @Output() doTurnEvent = new EventEmitter<void>();
 
@@ -44,26 +39,20 @@ export class GameAreaComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.createForm();
+    // this.game.helpString = this.game.currentPlayer.userName + ' zieht eine Karte vom Deck..';
   }
 
-  doTurn(): void {
-    this.doTurnEvent.emit();
-    this.form.get('answer').patchValue('');
-  }
-
-  pullCard(): void {
-    if(this.game.currentPlayer.resourceId === this.player.resourceId && this.game.gameStep === GameStep.PULL_CARD) {
-      this.deckState = 'pulled';
-      this.game.gameStep = GameStep.TURN_CARD;
-      this.gameService.sendGameUpdate(this.game);
-    }
-  }
-
-  private createForm(): void {
-    this.form = this.formBuilder.group({
-      answer: [{value: '', disabled: this.game.currentPlayer.resourceId != this.player.resourceId}, [Validators.required]]
-    });
-  }
-
+  // doTurn(): void {
+  //   this.doTurnEvent.emit();
+  //   this.gameAreaForm.get('answer').patchValue('');
+  // }
+  //
+  // pullCard(): void {
+  //   if(this.game.currentPlayer.resourceId === this.player.resourceId && this.game.gameStep === GameStep.PULL_CARD) {
+  //     this.game.helpString = this.game.currentPlayer.userName + ' deckt die Karte auf.. Sobald die Karte aufgedeckt ist, beginnt die Bombe zu ticken!';
+  //     this.game.gameStep = GameStep.TURN_CARD;
+  //     this.game.deckState = DeckState.PULLED;
+  //     this.gameService.sendGameUpdate(this.game);
+  //   }
+  // }
 }
