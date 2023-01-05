@@ -1,4 +1,5 @@
 import {Player} from "./player.model";
+import {PlayingCard} from "./card.model";
 
 export interface Game {
   id?: number;
@@ -19,6 +20,12 @@ export interface Game {
   hasPassword: boolean;
   currentPlayer?: Player;
   bombTime?: number;
+  round?: number;
+  gameStep?: number;
+  helpString?: string;
+  currentCard?: PlayingCard;
+  cardState?: string;
+  deckState?: string;
 }
 
 export interface GameState {

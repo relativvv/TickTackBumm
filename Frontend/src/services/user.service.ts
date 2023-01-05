@@ -34,6 +34,7 @@ export class UserService {
       "../../../../assets/images/profile7.PNG",
       "../../../../assets/images/profile8.jpg",
       "../../../../assets/images/profile9.jpg",
+      "../../../../assets/images/profile10.jpg",
       "../../../../assets/images/profile11.png",
       "../../../../assets/images/profile12.jpeg",
       "../../../../assets/images/profile13.jpeg",

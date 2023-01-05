@@ -1,4 +1,10 @@
 export interface PlayingCard {
-  state: number;
-  category: number;
+  state?: number;
+  category: PlayingCardCategory;
+  value: string;
+}
+
+export interface PlayingCardCategory {
+  id: number;
+  name: string;
 }

@@ -1,26 +1,26 @@
-<div *ngIf="player" class="container">
-  <div class="container--chat-stream">
-    <app-message-item
-      *ngFor="let message of messages"
-        [message]="message.message"
-        [player]="message.sender">
-    </app-message-item>
-  </div>
-  <form
-    class="container--chat-input"
-    [formGroup]="form"
-  >
-    <mat-form-field class="container--chat-input__chat-text" appearance="fill">
-      <mat-label>Was möchtest du sagen?</mat-label>
-      <input matInput type="text" formControlName="message">
-    </mat-form-field>
-    <button
-      color="primary"
-      mat-fab
-      type="submit"
-      [disabled]="form.invalid"
-      (click)="sendMessage()">
-      <mat-icon>send</mat-icon>
-    </button>
-  </form>
-</div>
+<!--<div *ngIf="player" class="container">-->
+<!--  <div class="container&#45;&#45;chat-stream">-->
+<!--    <app-message-item-->
+<!--      *ngFor="let message of messages"-->
+<!--        [message]="message.message"-->
+<!--        [player]="message.sender">-->
+<!--    </app-message-item>-->
+<!--  </div>-->
+<!--  <form-->
+<!--    class="container&#45;&#45;chat-input"-->
+<!--    [formGroup]="form"-->
+<!--  >-->
+<!--    <mat-form-field class="container&#45;&#45;chat-input__chat-text" appearance="fill">-->
+<!--      <mat-label>Was möchtest du sagen?</mat-label>-->
+<!--      <input matInput type="text" formControlName="message">-->
+<!--    </mat-form-field>-->
+<!--    <button-->
+<!--      color="primary"-->
+<!--      mat-fab-->
+<!--      type="submit"-->
+<!--      [disabled]="form.invalid"-->
+<!--      (click)="sendMessage()">-->
+<!--      <mat-icon>send</mat-icon>-->
+<!--    </button>-->
+<!--  </form>-->
+<!--</div>-->

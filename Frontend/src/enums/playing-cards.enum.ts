@@ -1,12 +1,19 @@
 export enum PlayingCardType {
-  BEKANNT = 0,
-  GEFRAGT = 1,
-  ORIGINAL = 2,
-  GESCHUETTELT = 3,
-  ANGESETZT = 4
+  BEKANNT = 1,
+  GEFRAGT = 2,
+  ANGESETZT = 3,
+  GESCHUETTELT = 4,
+  ORIGINAL = 5,
+  JOKER = 6
 }
 
 export enum PlayingCardState {
-  OPEN = 0,
-  HIDDEN = 1
+  OPEN = 'shown',
+  HIDDEN = 'hidden'
 }
+
+export enum DeckState {
+  PULLED = 'pulled',
+  NOT_PULLED = 'notPulled'
+}
+

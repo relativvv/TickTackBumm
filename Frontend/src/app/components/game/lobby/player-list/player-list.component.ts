@@ -1,5 +1,7 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Player} from "../../../../../models/player.model";
+import {GameService} from "../../../../../services/game.service";
+import {AppConfig} from "../../../../../models/appconfig.model";
 
 @Component({
   selector: 'app-player-list',
@@ -8,12 +10,18 @@ import {Player} from "../../../../../models/player.model";
 })
 export class PlayerListComponent implements OnInit {
 
-  @Input() players: Player[];
+  players: Player[];
 
-  constructor() {
+  constructor(
+    private readonly gameService: GameService
+  ) {
   }
 
   ngOnInit(): void {
+    this.gameService.getGameFromStore()
+      .subscribe((appConfig: AppConfig) => {
+        this.players = appConfig.game.players;
+      })
   }
 
 }
