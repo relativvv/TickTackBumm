@@ -4,7 +4,7 @@
       <mat-chip-avatar>
         <img [src]="player.image" alt="player_image">
       </mat-chip-avatar>
-      {{ player.userName }}
+      <ng-container *ngIf="dead"><i>* Spec *</i></ng-container> {{ player.userName }}
     </mat-chip>
   </mat-chip-list>
   <span>

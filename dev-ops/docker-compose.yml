@@ -27,6 +27,8 @@ services:
     image: mysql:8.0.28-oracle
     container_name: ticktackbumm_database
     restart: unless-stopped
+    ports:
+      - "3306:3306"
     volumes:
       - ticktackbumm_mysql_data:/var/lib/mysql
     environment:

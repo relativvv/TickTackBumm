@@ -11,6 +11,9 @@ import {setGame} from "../core/store/game/game.actions";
 import {AppConfig} from "../models/appconfig.model";
 import {selectPlayer} from "../core/store/player/player.selectors";
 import {selectGame} from "../core/store/game/game.selectors";
+import {take} from "rxjs/operators";
+import {GameStep} from "../enums/gamestep.enum";
+import {DeckState, PlayingCardState} from "../enums/playing-cards.enum";
 
 @Injectable({
   providedIn: 'root'
@@ -53,14 +56,15 @@ export class GameService {
   }
 
   public doTurn(game: Game): void {
-    let toShift = game.players.shift();
-    game.currentPlayer = null;
+    let copy = Object.assign({}, game);
+    copy.gameStep = GameStep.PULL_CARD;
+    copy.cardState = PlayingCardState.HIDDEN;
+    copy.deckState = DeckState.NOT_PULLED;
 
-    this.socketService.getSocket().send(JSON.stringify({
-      type: 'doTurn',
-      joinKey: game.joinKey,
-      game: game,
-      playerShift: toShift
+      this.socketService.getSocket().send(JSON.stringify({
+        type: 'doTurn',
+        joinKey: game.joinKey,
+        game: copy,
     }));
   }
 

@@ -160,20 +160,21 @@ class MessageHandler implements MessageComponentInterface {
                     'game' => $this->serializeGame($game)
                 ];
 
-                print_r($payload);
-
                 $this->broadcastToAllPlayersInRoom($key, $payload);
                 break;
 
             case 'doTurn':
                 $key = $data->joinKey;
                 $game = $data->game;
-                $shift = $data->playerShift;
 
-                $game->currentPlayer = $game->players[0];
+                $shift = array_shift($game->players);
                 $game->players[] = $shift;
+                $game->currentPlayer = $game->players[0];
 
-                $game->helpString = $game->currentPlayer->userName . ' ist dran!';
+                $card = $this->getNewCard();
+                $game->currentCard = $card;
+
+                $game->helpString = $game->currentPlayer->userName . ' ist dran!! Ziehe eine Karte... SCHNELL!';
 
                 $payload = [
                     'type' => 'updateGame',
@@ -201,19 +202,34 @@ class MessageHandler implements MessageComponentInterface {
                 $key = $data->joinKey;
                 $game = $data->game;
 
-                $game->currentPlayer->lives--;
-                foreach($game->players as $playerKey => $player) {
-                    if($player->resourceId === $game->currentPlayer->resourceId) {
-                        unset($game->players[$playerKey]);
+                $game->gameStep = 3;
+
+                $shift = array_shift($game->players);
+                $shift->lives--;
+
+                if($shift->lives === 0) {
+                    foreach($game->players as $key => $player) {
+                        if($player->resourceId === $shift->resourceId) {
+                            unset($game->players[$key]);
+
+                            if(count($game->players) === 1) {
+                                // WIN
+                            }
+                        }
                     }
+                } else {
+                    $game->players[] = $shift;
                 }
-                array_unshift($game->players, $game->currentPlayer);
+
+                $game->currentPlayer = $game->players[0];
+                $game->helpString = $game->currentPlayer->userName . ' ist dran. Sobald du eine Karte ziehst, fängt die Bombe wieder an zu ticken!!';
 
                 $payload = [
                     'type' => 'bombExploded',
-                    'currentPlayer' => $game->currentPlayer,
-                    'players' => $game->players
+                    'game' => $this->serializeGame($game)
                 ];
+
+                $game->currentCard = $this->getNewCard();
 
                 $this->broadcastToAllPlayersInRoom($key, $payload);
                 $this->broadcastToAllPlayersInRoom($key, ['players' => $game->players, 'type' => 'players']);
@@ -303,7 +319,7 @@ class MessageHandler implements MessageComponentInterface {
             'allowSetted' => $item->allowSetted,
             'enableJoker' => $item->enableJoker,
             'joinKey' => $item->joinKey,
-            'players' => $this->getSerializedPlayers($item->joinKey),
+            'players' => $item->players ?? $this->getSerializedPlayers($item->joinKey),
             'currentPlayer' => $currentPlayer?->toArray(),
             'bombTime' => $item->bombTime ?? null,
             'round' => $item->round ?? null,

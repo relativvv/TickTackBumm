@@ -1,10 +1,11 @@
-import {AfterContentInit, Component, Input, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Player} from "../../../../../models/player.model";
 import {MatDialog} from "@angular/material/dialog";
 import {PlayerDetailsComponent} from "../../modals/player-details/player-details.component";
-import {animate, state, style, transition, trigger} from "@angular/animations";
-import {Memoize} from "typescript-memoize";
+import {animate, style, transition, trigger} from "@angular/animations";
 import {Game} from "../../../../../models/game.model";
+import {GameService} from "../../../../../services/game.service";
+import {AppConfig} from "../../../../../models/appconfig.model";
 
 @Component({
   selector: 'app-player-order',
@@ -25,11 +26,18 @@ import {Game} from "../../../../../models/game.model";
 })
 export class PlayerOrderComponent implements OnInit {
 
+  game: Game;
+
   constructor(
-    private readonly matDialogService: MatDialog
+    private readonly matDialogService: MatDialog,
+    private readonly gameService: GameService
   ) { }
 
   ngOnInit(): void {
+    this.gameService.getGameFromStore()
+      .subscribe((gameConfig: AppConfig) => {
+        this.game = gameConfig.game;
+      })
   }
 
   getRandomColorByName(name: string): string {
@@ -38,7 +46,6 @@ export class PlayerOrderComponent implements OnInit {
   }
 
   openPlayerDetails(player: Player) {
-    console.log(player);
     this.matDialogService.open(PlayerDetailsComponent, {
       minWidth: 400,
       data: {

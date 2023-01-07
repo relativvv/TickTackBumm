@@ -68,7 +68,7 @@ class Game
             'allowShaked' => $this->getAllowShaked(),
             'allowSetted' => $this->getAllowSetted(),
             'enableJoker' => $this->getJokerEnabled(),
-            'hasPassword' => $this->getPassword() !== null
+            'hasPassword' => $this->getPassword() !== null,
         ];
     }
 

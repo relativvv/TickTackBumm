@@ -5,7 +5,7 @@ import {GameService} from "../../../services/game.service";
 import {Game, Message} from "../../../models/game.model";
 import {GameState} from "../../../enums/gamestate.enum";
 import {SocketService} from "../../../services/socket.service";
-import {debounceTime, distinctUntilChanged, switchMap, take} from "rxjs/operators";
+import {debounceTime, delay, distinctUntilChanged, switchMap, take} from "rxjs/operators";
 import {ToastrService} from "ngx-toastr";
 import {MatDialog} from "@angular/material/dialog";
 import {JoinGameComponent} from "./lobby/modals/join-game/join-game.component";
@@ -39,6 +39,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   messages = [];
 
   bombInterval: any;
+  isBombTicking: boolean;
 
   game: Game;
 
@@ -100,15 +101,20 @@ export class GameComponent implements OnInit, AfterViewInit {
                   copy.deckState = DeckState.NOT_PULLED;
                   copy.round = 1;
                   copy.currentPlayer = copy.players[0];
+                  copy.helpString = copy.currentPlayer.userName + ' zieht eine Karte vom Deck..'
                   this.game = copy;
                   this.gameService.setGame(copy);
+                  this.gameService.sendGameUpdate(copy);
 
                   return combineLatest([this.gameService.updateGame(copy.id, copy), of(playerConfig.player.resourceId)]);
                 })
               )
-              .subscribe(([game, resourceId]: [Game, string]) => {
-                this.gameService.renewGameCardAndUpdate(game);
-                if(game.currentPlayer.resourceId === resourceId) {
+              .pipe(
+                switchMap(([dbGame, resourceId]: [Game, string]) => combineLatest([this.gameService.getGameFromStore().pipe(take(1)), of(resourceId)]))
+              )
+              .subscribe(([gameConfig, resourceId]: [AppConfig, string]) => {
+                this.gameService.renewGameCardAndUpdate(gameConfig.game);
+                if(gameConfig.game.currentPlayer.resourceId === resourceId) {
                   this.gameAreaForm.enable();
                 } else {
                   this.gameAreaForm.disable();
@@ -261,7 +267,7 @@ export class GameComponent implements OnInit, AfterViewInit {
                       switchMap(() => {
                         this.lookForChanges();
                         this.lobbyForm.disable();
-                        return this.gameService.getGameFromStore();
+                        return this.gameService.getGameFromStore().pipe(take(1));
                       })
                     )
                 })
@@ -301,12 +307,10 @@ export class GameComponent implements OnInit, AfterViewInit {
         case 'updateGame':
           let updatedGame = json.game;
 
-          combineLatest([this.gameService.getGameFromStore(), this.userService.getPlayer()])
-            .pipe(
-              take(1)
-            )
+          combineLatest([this.gameService.getGameFromStore().pipe(take(1)), this.userService.getPlayer().pipe(take(1))])
             .subscribe(([gameConfig, playerConfig]) => {
               let copy = Object.assign({}, gameConfig.game);
+
               if(updatedGame.gameStep !== copy.gameStep) {
                 if(copy.gameStep === GameStep.PULL_CARD) {
                   updatedGame.deckState = DeckState.PULLED;
@@ -316,13 +320,15 @@ export class GameComponent implements OnInit, AfterViewInit {
               }
 
               if(updatedGame.gameState.id === GameState.INGAME) {
-                if(updatedGame.gameStep === GameStep.BOMB_TICKING && updatedGame.gameStep !== gameConfig.game.gameStep) {
+                if(updatedGame.gameStep === GameStep.BOMB_TICKING && updatedGame.gameStep !== gameConfig.game.gameStep && !this.isBombTicking) {
                   // Start bomb
+                  this.isBombTicking = true;
+
                   this.socketService.getSocket().send(JSON.stringify({
                     type: 'startBomb',
                     joinKey: updatedGame.joinKey,
                     minBombTime: updatedGame.minBombTime,
-                    maxBombTime: updatedGame.maxBombTime
+                    maxBombTime: updatedGame.maxBombTime,
                   }))
                 }
 
@@ -349,6 +355,20 @@ export class GameComponent implements OnInit, AfterViewInit {
           break;
 
         case 'bombExploded':
+          const updatedG = json.game;
+          this.isBombTicking = false;
+          updatedG.deckState = DeckState.NOT_PULLED;
+          updatedG.cardState = PlayingCardState.HIDDEN;
+
+          this.gameService.setGame(updatedG);
+
+
+          setTimeout(() => {
+            const clone = Object.assign({}, updatedG);
+            clone.gameStep = GameStep.PULL_CARD;
+            this.gameService.setGame(clone);
+            this.gameService.sendGameUpdate(clone);
+          }, 2000);
           break;
       }
 
@@ -358,7 +378,6 @@ export class GameComponent implements OnInit, AfterViewInit {
 
   private startBomb(time: number): void {
     this.bombInterval = setInterval(() => {
-      console.log(time);
       time--;
 
       if(time === 0) {

@@ -8,6 +8,8 @@ import {GameService} from "../../../../services/game.service";
 import {FormGroup} from "@angular/forms";
 import {combineLatest} from "rxjs";
 import {UserService} from "../../../../services/user.service";
+import {AppConfig} from "../../../../models/appconfig.model";
+import {take} from "rxjs/operators";
 
 @Component({
   selector: 'app-ingame',
@@ -20,24 +22,20 @@ export class IngameComponent implements OnInit {
   @Input() gameAreaForm: FormGroup;
 
   constructor(
-    private readonly socketService: SocketService,
-    private readonly router: Router,
-    private readonly toastrService: ToastrService,
     private readonly gameService: GameService,
-    private readonly userService: UserService
-  ) { }
+  ) {
+  }
 
   ngOnInit(): void {
-    combineLatest([this.gameService.getGameFromStore(), this.userService])
-    if(!this.game || !this.player) {
-      this.router.navigate(['/']);
-      this.toastrService.error('Die Runde ist beendet..')
-    }
-
-    this.game.currentPlayer = this.game.players[0];
   }
 
   doTurn(): void {
-    this.gameService.doTurn(this.game);
+    this.gameService.getGameFromStore()
+      .pipe(
+        take(1)
+      )
+      .subscribe((gameConfig: AppConfig) => {
+        this.gameService.doTurn(gameConfig.game);
+      });
   }
 }

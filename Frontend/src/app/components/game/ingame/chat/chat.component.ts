@@ -2,7 +2,11 @@ import {Component, Input, OnInit} from '@angular/core';
 import {SocketService} from "../../../../../services/socket.service";
 import {UserService} from "../../../../../services/user.service";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {Message} from "../../../../../models/game.model";
+import {Game, Message} from "../../../../../models/game.model";
+import {Player} from "../../../../../models/player.model";
+import {GameService} from "../../../../../services/game.service";
+import {combineLatest} from "rxjs";
+import {AppConfig} from "../../../../../models/appconfig.model";
 
 @Component({
   selector: 'app-chat',
@@ -14,50 +18,65 @@ export class ChatComponent implements OnInit {
   @Input() messages: Message[];
 
   form: FormGroup;
+  game: Game;
+  player: Player;
 
   constructor(
     private readonly socketService: SocketService,
     private readonly usersService: UserService,
-    private readonly formBuilder: FormBuilder
+    private readonly formBuilder: FormBuilder,
+    private readonly gameService: GameService
   ) { }
 
   ngOnInit(): void {
-    // this.createForm();
+    combineLatest([
+      this.gameService.getGameFromStore(),
+      this.usersService.getPlayer()
+    ])
+      .subscribe(([game, player]: [AppConfig, AppConfig]) => {
+        this.game = game.game;
+        this.player = player.player;
+    });
+    this.createForm();
   }
 
-  // sendMessage(): void {
-  //   if(this.form.invalid) {
-  //     return;
-  //   }
-  //
-  //   const message = this.form.get('message');
-  //   const payload = {
-  //     type: 'sendMessage',
-  //     msg: message.value,
-  //     joinKey: this.game.joinKey,
-  //     player: {
-  //       resourceId: this.player.resourceId,
-  //       userName: this.player.userName,
-  //       image: this.player.image,
-  //       creator: this.player.creator
-  //     }
-  //   }
-  //
-  //   this.socketService.getSocket().send(JSON.stringify(payload));
-  //
-  //   const messageItem: Message = {
-  //     message: this.form.get('message').value,
-  //     sender: this.player
-  //   }
-  //
-  //   this.messages.push(messageItem);
-  //   this.form.get('message').patchValue('');
-  // }
-  //
-  // private createForm(): void {
-  //   this.form = this.formBuilder.group({
-  //     message: ['', [Validators.required]]
-  //   })
-  // }
+  sendMessage(): void {
+    if(this.form.invalid) {
+      return;
+    }
+
+    const message = this.form.get('message');
+    const payload = {
+      type: 'sendMessage',
+      msg: message.value,
+      joinKey: this.game.joinKey,
+      player: {
+        resourceId: this.player.resourceId,
+        userName: this.player.userName,
+        image: this.player.image,
+        creator: this.player.creator
+      }
+    }
+
+    this.socketService.getSocket().send(JSON.stringify(payload));
+
+    const messageItem: Message = {
+      message: this.form.get('message').value,
+      sender: this.player
+    }
+
+    this.messages.push(messageItem);
+    this.form.get('message').patchValue('');
+  }
+
+  isPlayerAlive(): boolean {
+    return this.game.players.filter((player: Player) => player.resourceId === this.player.resourceId).length > 0;
+  }
+
+  private createForm(): void {
+    this.form = this.formBuilder.group({
+      message: ['', [Validators.required]]
+    })
+  }
 
 }

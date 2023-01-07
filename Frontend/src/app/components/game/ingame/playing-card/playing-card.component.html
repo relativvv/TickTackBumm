@@ -1,35 +1,35 @@
-<!--<div class="container" (click)="flipCard()">-->
-<!--  <div [@flipCard]="cardState" class="container&#45;&#45;card" [matTooltip]="cardState === 'shown' ? getToolTip() : null">-->
-<!--    <div class="container&#45;&#45;card__front">-->
-<!--      <div class="container&#45;&#45;card__front__content">-->
-<!--        <div-->
-<!--          class="container&#45;&#45;card__front__content__head">-->
-<!--          <div>-->
-<!--          <ng-container [ngSwitch]="playingCardType">-->
-<!--            <mat-icon *ngSwitchCase="1">wc</mat-icon>-->
-<!--            <mat-icon *ngSwitchCase="2">help</mat-icon>-->
-<!--            <mat-icon *ngSwitchCase="3">tab</mat-icon>-->
-<!--            <mat-icon *ngSwitchCase="4">texture</mat-icon>-->
-<!--            <mat-icon *ngSwitchCase="5">dehaze</mat-icon>-->
-<!--          </ng-container>-->
-<!--          </div>-->
-<!--          <h3-->
-<!--            [class.known]="playingCardType === 1"-->
-<!--            [class.asked]="playingCardType === 2"-->
-<!--            [class.setted]="playingCardType === 3"-->
-<!--            [class.shaked]="playingCardType === 4"-->
-<!--            [class.original]="playingCardType === 5">{{ getPlayingCardTypeString() }}</h3>-->
-<!--        </div>-->
-<!--        <div class="container&#45;&#45;card__front__content__body">-->
-<!--          {{ value }}-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--    <div class="container&#45;&#45;card__back">-->
-<!--      <div class="container&#45;&#45;card__back__content">-->
-<!--        <img src="../../../../../assets/images/bomb.png" alt="bomb">-->
-<!--        <h3><b>TickTackBumm</b></h3>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</div>-->
+<div class="container" (click)="flipCard()">
+  <div [@flipCard]="cardState" class="container--card" [matTooltip]="cardState === 'shown' ? getToolTip() : null">
+    <div class="container--card__front">
+      <div class="container--card__front__content">
+        <div
+          class="container--card__front__content__head">
+          <div>
+          <ng-container [ngSwitch]="playingCardType">
+            <mat-icon *ngSwitchCase="1">wc</mat-icon>
+            <mat-icon *ngSwitchCase="2">help</mat-icon>
+            <mat-icon *ngSwitchCase="3">tab</mat-icon>
+            <mat-icon *ngSwitchCase="4">texture</mat-icon>
+            <mat-icon *ngSwitchCase="5">dehaze</mat-icon>
+          </ng-container>
+          </div>
+          <h3
+            [class.known]="playingCardType === 1"
+            [class.asked]="playingCardType === 2"
+            [class.setted]="playingCardType === 3"
+            [class.shaked]="playingCardType === 4"
+            [class.original]="playingCardType === 5">{{ getPlayingCardTypeString() }}</h3>
+        </div>
+        <div class="container--card__front__content__body">
+          {{ value }}
+        </div>
+      </div>
+    </div>
+    <div class="container--card__back">
+      <div class="container--card__back__content">
+        <img src="../../../../../assets/images/bomb.png" alt="bomb">
+        <h3><b>TickTackBumm</b></h3>
+      </div>
+    </div>
+  </div>
+</div>

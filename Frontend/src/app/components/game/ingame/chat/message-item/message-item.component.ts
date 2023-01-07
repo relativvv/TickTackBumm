@@ -1,6 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Player} from "../../../../../../models/player.model";
-import {JoinGameComponent} from "../../../lobby/modals/join-game/join-game.component";
 import {MatDialog} from "@angular/material/dialog";
 import {PlayerDetailsComponent} from "../../../modals/player-details/player-details.component";
 
@@ -13,6 +12,7 @@ export class MessageItemComponent implements OnInit {
 
   @Input() player: Player;
   @Input() message: string;
+  @Input() dead: boolean;
 
   private red: number;
   private green: number;
