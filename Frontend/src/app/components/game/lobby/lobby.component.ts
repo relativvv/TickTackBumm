@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {Clipboard} from "@angular/cdk/clipboard";
 import {ToastrService} from "ngx-toastr";
@@ -8,7 +8,11 @@ import {UserService} from "../../../../services/user.service";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {GameState} from "../../../../enums/gamestate.enum";
 import {GameService} from "../../../../services/game.service";
+import {GameStep} from "../../../../enums/gamestep.enum";
 import {SocketService} from "../../../../services/socket.service";
+import {AppConfig} from "../../../../models/appconfig.model";
+import {combineLatest} from "rxjs";
+import {take, takeUntil} from "rxjs/operators";
 
 @Component({
   selector: 'app-lobby',
@@ -41,19 +45,23 @@ import {SocketService} from "../../../../services/socket.service";
 export class LobbyComponent implements OnInit {
 
   @Input() form: FormGroup;
-  @Input() game: Game;
-  @Input() player: Player;
 
-  singleState = 'notStarted';
-  removeComponent = false;
+  @Input() startTriggered: boolean;
+  @Input() timer: number;
+  @Input() singleState: string;
+  @Input() removeComponent: boolean;
+
+  @Output() gameStarter = new EventEmitter<void>();
+
+  game: Game;
+  player: Player;
 
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly clipboard: Clipboard,
     private readonly toastService: ToastrService,
     private readonly userService: UserService,
-    private readonly gameService: GameService,
-    private readonly socketService: SocketService
+    private readonly gameService: GameService
   ) {
   }
 
@@ -62,13 +70,14 @@ export class LobbyComponent implements OnInit {
       this.singleState = 'start';
     }, 200);
 
-    if(this.game.players.length >= this.game.maxPlayers) {
-      return;
-    }
-
-    if(this.game.players.length === 0) {
-      return;
-    }
+    combineLatest([this.gameService.getGameFromStore(), this.userService.getPlayer()])
+      .pipe(
+        takeUntil(this.gameStarter.asObservable())
+      )
+      .subscribe(([gameConfig, playerConfig]: [AppConfig, AppConfig]) => {
+        this.game = gameConfig ? gameConfig.game : null;
+        this.player = playerConfig ? playerConfig.player : null
+      })
   }
 
   copyLink(): void {
@@ -77,19 +86,7 @@ export class LobbyComponent implements OnInit {
   }
 
   startGame(): void {
-    this.singleState = 'notStarted';
-    this.removeComponent = true;
-
-    setTimeout(() => {
-      this.game.gameState.id = GameState.INGAME;
-      this.gameService.updateGame(this.game.id, this.game).subscribe(() => {
-        this.socketService.getSocket().send(JSON.stringify({
-          type: 'gameUpdate',
-          joinKey: this.game.joinKey,
-          game: this.game
-        }));
-      });
-    }, 500)
+    this.gameStarter.emit();
   }
 
   isFormInvalid(): boolean {

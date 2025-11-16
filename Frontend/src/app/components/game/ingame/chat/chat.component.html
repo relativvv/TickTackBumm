@@ -1,8 +1,9 @@
-<div *ngIf="player" class="container">
+<div *ngIf="player && game" class="container">
   <div class="container--chat-stream">
     <app-message-item
       *ngFor="let message of messages"
         [message]="message.message"
+        [dead]="isPlayerAlive()"
         [player]="message.sender">
     </app-message-item>
   </div>

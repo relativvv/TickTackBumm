@@ -53,6 +53,9 @@ class GameController extends AbstractController
         return new JsonResponse($game->toArray());
     }
 
+    /**
+     * @throws \JsonException
+     */
     public function updateGame(int $id, Request $request): JsonResponse
     {
         $data = $this->getData($request);

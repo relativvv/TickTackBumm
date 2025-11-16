@@ -20,6 +20,7 @@ import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import { HttpClientModule } from "@angular/common/http";
 import {StoreModule} from "@ngrx/store";
 import {playerReducer} from "../core/store/player/player.reducer";
+import {gameReducer} from "../core/store/game/game.reducer";
 
 @NgModule({
   declarations: [
@@ -43,7 +44,7 @@ import {playerReducer} from "../core/store/player/player.reducer";
     MatProgressSpinnerModule,
     HttpClientModule,
     ToastrModule.forRoot(),
-    StoreModule.forRoot({ player: playerReducer })
+    StoreModule.forRoot({ player: playerReducer, game: gameReducer })
   ],
   providers: [],
   bootstrap: [

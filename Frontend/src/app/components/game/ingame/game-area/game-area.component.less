@@ -1,4 +1,11 @@
 :host {
+  * {
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+
   .container:hover {
     cursor: grab;
   }
@@ -39,6 +46,14 @@
         height: 48px;
       }
 
+      &__deck {
+        z-index: 100;
+      }
+
+      &__card {
+        z-index: 99;
+      }
+
       &__deck, &__card {
         transition: 0.3s;
         position: relative;
@@ -50,6 +65,53 @@
 
       &__card:hover {
         transform: scale(1.03);
+      }
+
+      &--info-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &__info {
+          flex: 0.2;
+          position: absolute;
+          left: 140px;
+          font-family: Roboto, serif;
+          top: 20px;
+          color: white;
+        }
+
+        &--image-container {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          left: 70px;
+          top: 40px;
+          position: absolute;
+
+          &__image {
+            width: 100px;
+            animation: jump 1.8s infinite;
+          }
+
+          &__image-text {
+            position: absolute;
+            text-align: center;
+            top: 30px;
+            left: -5px;
+            color: white;
+          }
+        }
+
+        @keyframes jump {
+          0% { transform: translate(-50%, -50%) scale(1.15, 0.85); }
+          50% { transform: translate(-50%, -100%) scale(1, 1); }
+          55% { transform: translate(-50%, -100%) }
+          60% { transform: translate(-50%, -100%) }
+          65% { transform: translate(-50%, -100%) }
+          70% { transform: translate(-50%, -100%) }
+          100% { transform: translate(-50%, -50%) scale(1.15, 0.85); }
+        }
       }
     }
 
@@ -79,6 +141,13 @@
           text-align: center;
         }
       }
+    }
+
+    .explosion {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 10000;
     }
   }
 

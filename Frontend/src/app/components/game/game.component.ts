@@ -2,20 +2,20 @@ import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {Title} from "@angular/platform-browser";
 import {GameService} from "../../../services/game.service";
-import {Game} from "../../../models/game.model";
+import {Game, Message} from "../../../models/game.model";
 import {GameState} from "../../../enums/gamestate.enum";
 import {SocketService} from "../../../services/socket.service";
-import {debounceTime, distinctUntilChanged, pairwise, startWith, switchMap, take} from "rxjs/operators";
+import {debounceTime, delay, distinctUntilChanged, switchMap, take} from "rxjs/operators";
 import {ToastrService} from "ngx-toastr";
 import {MatDialog} from "@angular/material/dialog";
 import {JoinGameComponent} from "./lobby/modals/join-game/join-game.component";
 import {combineLatest, EMPTY, NEVER, of} from "rxjs";
 import {UserService} from "../../../services/user.service";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {selectPlayer} from "../../../core/store/player/player.selectors";
 import {Player} from "../../../models/player.model";
-import {Store} from "@ngrx/store";
 import {AppConfig} from "../../../models/appconfig.model";
+import {GameStep} from "../../../enums/gamestep.enum";
+import {DeckState, PlayingCardState} from "../../../enums/playing-cards.enum";
 
 @Component({
   selector: 'app-game',
@@ -24,13 +24,24 @@ import {AppConfig} from "../../../models/appconfig.model";
 })
 export class GameComponent implements OnInit, AfterViewInit {
 
+  startTriggered: boolean = false;
+  timer: number = 3;
+  singleState = 'notStarted';
+  removeComponent = false;
+
   LOBBY = GameState.LOBBY;
   INGAME = GameState.INGAME;
   END = GameState.END;
 
-  game: Game;
   lobbyForm: FormGroup
-  player: Player;
+  gameAreaForm: FormGroup;
+
+  messages = [];
+
+  bombInterval: any;
+  isBombTicking: boolean;
+
+  game: Game;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -47,13 +58,110 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.getPlayer();
-    this.createForm();
-    this.lookForChanges();
   }
 
   ngAfterViewInit() {
     this.fetchGame();
+  }
+
+  startGame(): void {
+    if(!this.startTriggered) {
+      this.startTriggered = true;
+      this.timer = 3;
+
+      this.gameService.getGameFromStore()
+        .pipe(
+          take(1)
+        )
+        .subscribe((appConfig: AppConfig) => {
+          this.socketService.getSocket().send(JSON.stringify({
+            type: 'startCountdown',
+            joinKey: appConfig.game.joinKey
+          }));
+        })
+
+      const timerInt = setInterval(() => {
+        this.timer--;
+
+        if (this.timer === 0) {
+          this.singleState = 'notStarted';
+          this.removeComponent = true;
+          setTimeout(() => {
+            combineLatest([this.gameService.getGameFromStore(), this.userService.getPlayer()])
+              .pipe(
+                take(1),
+                switchMap(([gameConfig, playerConfig]) => {
+                  let copy = Object.assign({}, gameConfig.game);
+                  copy.gameState = {
+                    id: GameState.INGAME,
+                    name: 'ingame'
+                  };
+                  copy.gameStep = GameStep.PULL_CARD;
+                  copy.cardState = PlayingCardState.HIDDEN;
+                  copy.deckState = DeckState.NOT_PULLED;
+                  copy.round = 1;
+                  copy.currentPlayer = copy.players[0];
+                  copy.helpString = copy.currentPlayer.userName + ' zieht eine Karte vom Deck..'
+                  this.game = copy;
+                  this.gameService.setGame(copy);
+                  this.gameService.sendGameUpdate(copy);
+
+                  return combineLatest([this.gameService.updateGame(copy.id, copy), of(playerConfig.player.resourceId)]);
+                })
+              )
+              .pipe(
+                switchMap(([dbGame, resourceId]: [Game, string]) => combineLatest([this.gameService.getGameFromStore().pipe(take(1)), of(resourceId)]))
+              )
+              .subscribe(([gameConfig, resourceId]: [AppConfig, string]) => {
+                this.gameService.renewGameCardAndUpdate(gameConfig.game);
+                if(gameConfig.game.currentPlayer.resourceId === resourceId) {
+                  this.gameAreaForm.enable();
+                } else {
+                  this.gameAreaForm.disable();
+                }
+                clearInterval(timerInt);
+              });
+            }, 500)
+        }
+      }, 1000);
+    }
+  }
+
+  private externalStart(): void {
+    if(!this.startTriggered) {
+      this.startTriggered = true;
+      this.timer = 3;
+
+      const timerInt = setInterval(() => {
+        this.timer--;
+
+        if (this.timer === 0) {
+          this.singleState = 'notStarted';
+          this.removeComponent = true;
+
+          setTimeout(() => {
+            this.gameService.getGameFromStore()
+              .pipe(
+                take(1)
+              )
+              .subscribe((appConfig: AppConfig) => {
+                let copy = Object.assign({}, appConfig.game);
+                const gameState = {
+                  id: GameState.INGAME,
+                  name: 'ingame'
+                }
+                copy.gameState = gameState;
+                copy.gameStep = GameStep.PULL_CARD;
+                copy.round = 1;
+                this.game = copy;
+                this.gameService.setGame(copy);
+              })
+
+            clearInterval(timerInt);
+          }, 500)
+        }
+      }, 1000);
+    }
   }
 
   private fetchGame(): void {
@@ -67,7 +175,11 @@ export class GameComponent implements OnInit, AfterViewInit {
         return this.gameService.getGameByJoinKey(params.key);
       })
     ).subscribe((game: Game) => {
+      game.players = [];
+      game.currentPlayer = null;
+      game.gameStep = GameStep.PULL_CARD;
       this.game = game;
+      this.gameService.setGame(game);
 
       const int = setInterval(() => {
         if (this.socketService.getSocket().readyState === WebSocket.OPEN) {
@@ -75,12 +187,12 @@ export class GameComponent implements OnInit, AfterViewInit {
 
           this.socketService.getSocket().send(JSON.stringify({
             type: 'gameInfos',
-            joinKey: this.game.joinKey
+            joinKey: game.joinKey
           }))
 
           this.socketService.getSocket().send(JSON.stringify({
             type: 'clientIsInRoom',
-            joinKey: this.game.joinKey
+            joinKey: game.joinKey
           }));
           clearInterval(int);
         }
@@ -91,54 +203,90 @@ export class GameComponent implements OnInit, AfterViewInit {
   private startListening(): void {
     this.socketService.getSocket().onmessage = (e) => {
       const json = JSON.parse(e.data);
-      switch(json.type) {
-        case 'updateSettings':
-          this.lobbyForm.setValue(json.values, { emitEvent: false });
-          break;
 
+      switch(json.type) {
         case 'players':
-          this.game.players = json.players;
-          if(this.player && this.game.gameState.id == GameState.LOBBY) {
-            const p = this.game.players.find((player: Player) => player.resourceId == this.player.resourceId)
-            if(p) {
-              let copy = Object.assign({}, this.player);
-              copy.creator = p.creator;
-              this.userService.setPlayer(copy);
-              this.getPlayer();
-              if(this.userService.hasPermission(this.player)) {
-                this.lobbyForm.enable();
+          combineLatest([this.gameService.getGameFromStore(), this.userService.getPlayer()])
+            .pipe(
+              take(1)
+            )
+            .subscribe(([gameConfig, playerConfig]) => {
+
+              let copy = Object.assign({}, gameConfig.game);
+              copy.players = json.players;
+              this.game = copy;
+              this.gameService.setGame(copy);
+
+              if(playerConfig && gameConfig) {
+                if(playerConfig.player && gameConfig.game.gameState.id == GameState.LOBBY) {
+                  const p = copy.players.find((player: Player) => player.resourceId == playerConfig.player.resourceId)
+                  if(p) {
+                    let copy = Object.assign({}, playerConfig.player);
+                    copy.creator = p.creator;
+                    this.userService.setPlayer(copy);
+
+                    if(this.userService.hasPermission(copy)) {
+                      if(this.lobbyForm) {
+                        this.lobbyForm.enable();
+                      }
+                    }
+                  }
+                }
               }
-            }
-          }
+            })
           break;
 
         case 'isInRoom':
           if(json.isInRoom === false) {
-            if(this.game.players.length > 0 && this.game.players.length < this.game.maxPlayers) {
-              if(this.game.gameState.id === GameState.LOBBY) {
-                return this.matDialogService.open(JoinGameComponent, {
-                  minWidth: 400,
-                  disableClose: true,
-                  data: {
-                    game: this.game
+            this.gameService.getGameFromStore()
+              .pipe(
+                take(1),
+                switchMap((appConfig: AppConfig) => {
+                  if(appConfig.game.players.length === 0) {
+                    this.router.navigate(['/']);
+                    this.toastrService.error('Diese Runde existiert nicht.');
+                    return NEVER;
                   }
-                }).afterClosed()
-                  .pipe(
-                    switchMap(() => {
-                      return this.userService.getPlayer();
-                    })
-                  ).subscribe((appConfig: AppConfig) => {
-                    this.player = appConfig.player;
-                  });
-              } else {
-                this.router.navigate(['/']);
-                this.toastrService.error('Diese Runde läuft bereits.');
-              }
-            } else {
-              this.router.navigate(['/']);
-              this.toastrService.error('Diese Runde existiert nicht.');
-            }
+
+                  if(appConfig.game.gameState.id !== GameState.LOBBY) {
+                    this.router.navigate(['/']);
+                    this.toastrService.error('Diese Runde läuft bereits.');
+                    return NEVER;
+                  }
+
+                  this.createForm();
+
+                  return this.matDialogService.open(JoinGameComponent, {
+                    minWidth: 400,
+                    disableClose: true,
+                    data: {
+                      game: appConfig.game
+                    }
+                  }).afterClosed()
+                    .pipe(
+                      switchMap(() => {
+                        this.lookForChanges();
+                        this.lobbyForm.disable();
+                        return this.gameService.getGameFromStore().pipe(take(1));
+                      })
+                    )
+                })
+              ).subscribe((appConfig: AppConfig) => {
+                this.updateLobbyForm(appConfig.game);
+                this.game = appConfig.game;
+            })
+            return;
           }
+
+          this.createForm();
+          this.lookForChanges();
+          this.gameService.getGameFromStore()
+            .pipe(
+              take(1)
+            )
+            .subscribe((appConfig: AppConfig) => {
+              this.game = appConfig.game;
+            })
           break;
 
         case 'triggerEnd':
@@ -148,9 +296,79 @@ export class GameComponent implements OnInit, AfterViewInit {
           }
           break;
 
+        case 'receiveMessage':
+          const messageItem: Message = {
+            message: json.message,
+            sender: json.player
+          }
+          this.messages.push(messageItem);
+          break;
+
         case 'updateGame':
-          const game = json.game;
-          this.game = game;
+          let updatedGame = json.game;
+
+          combineLatest([this.gameService.getGameFromStore().pipe(take(1)), this.userService.getPlayer().pipe(take(1))])
+            .subscribe(([gameConfig, playerConfig]) => {
+              let copy = Object.assign({}, gameConfig.game);
+
+              if(updatedGame.gameStep !== copy.gameStep) {
+                if(copy.gameStep === GameStep.PULL_CARD) {
+                  updatedGame.deckState = DeckState.PULLED;
+                } else if(copy.gameStep === GameStep.TURN_CARD) {
+                  updatedGame.cardState = PlayingCardState.OPEN;
+                }
+              }
+
+              if(updatedGame.gameState.id === GameState.INGAME) {
+                if(updatedGame.gameStep === GameStep.BOMB_TICKING && updatedGame.gameStep !== gameConfig.game.gameStep && !this.isBombTicking) {
+                  // Start bomb
+                  this.isBombTicking = true;
+
+                  this.socketService.getSocket().send(JSON.stringify({
+                    type: 'startBomb',
+                    joinKey: updatedGame.joinKey,
+                    minBombTime: updatedGame.minBombTime,
+                    maxBombTime: updatedGame.maxBombTime,
+                  }))
+                }
+
+                if(updatedGame.currentPlayer.resourceId === playerConfig.player.resourceId && updatedGame.gameStep === GameStep.BOMB_TICKING) {
+                  this.gameAreaForm.enable();
+                } else {
+                  this.gameAreaForm.disable();
+                }
+              } else if(updatedGame.gameState.id === GameState.LOBBY) {
+                this.updateLobbyForm(updatedGame);
+              }
+
+              this.game = updatedGame;
+              this.gameService.setGame(updatedGame);
+            })
+          break;
+
+        case 'countdownStarted':
+          this.externalStart();
+          break;
+
+        case 'bombStarted':
+          this.startBomb(json.timer);
+          break;
+
+        case 'bombExploded':
+          const updatedG = json.game;
+          this.isBombTicking = false;
+          updatedG.deckState = DeckState.NOT_PULLED;
+          updatedG.cardState = PlayingCardState.HIDDEN;
+
+          this.gameService.setGame(updatedG);
+
+
+          setTimeout(() => {
+            const clone = Object.assign({}, updatedG);
+            clone.gameStep = GameStep.PULL_CARD;
+            this.gameService.setGame(clone);
+            this.gameService.sendGameUpdate(clone);
+          }, 2000);
           break;
       }
 
@@ -158,7 +376,35 @@ export class GameComponent implements OnInit, AfterViewInit {
     }
   }
 
+  private startBomb(time: number): void {
+    this.bombInterval = setInterval(() => {
+      time--;
+
+      if(time === 0) {
+        combineLatest([this.gameService.getGameFromStore(), this.userService.getPlayer()])
+          .pipe(
+            take(1)
+          )
+          .subscribe(([gameConfig, playerConfig]) => {
+            if(gameConfig.game.currentPlayer.resourceId === playerConfig.player.resourceId) {
+              this.socketService.getSocket().send(JSON.stringify({
+                type: 'explodeBomb',
+                joinKey: gameConfig.game.joinKey,
+                game: gameConfig.game
+              }));
+            }
+
+            clearInterval(this.bombInterval);
+          })
+      }
+    }, 1000)
+  }
+
   private createForm(): void {
+    this.gameAreaForm = this.formBuilder.group({
+      answer: [{value: '', disabled: true}, [Validators.required]]
+    });
+
     this.lobbyForm = this.formBuilder.group({
       allowKnown: [true, { updateOn: 'change' }],
       allowAsked: [true, { updateOn: 'change' }],
@@ -168,13 +414,9 @@ export class GameComponent implements OnInit, AfterViewInit {
       enableJoker: [true, { updateOn: 'change' }],
       minBombTime: [10, {validators: [Validators.required, Validators.min(1)], updateOn: 'change'}],
       maxBombTime: [50, {validators: [Validators.required, Validators.max(999)], updateOn: 'change'}],
-      minPlayers: [3, {validators: [Validators.required, Validators.min(3)], updateOn: 'change'}],
+      minPlayers: [1, {validators: [Validators.required, Validators.min(1)], updateOn: 'change'}],
       maxPlayers: [8, {validators: [Validators.required, Validators.max(16)], updateOn: 'change'}],
     });
-
-    if(!this.userService.hasPermission(this.player)) {
-      this.lobbyForm.disable();
-    }
   }
 
   private lookForChanges() {
@@ -183,53 +425,49 @@ export class GameComponent implements OnInit, AfterViewInit {
         debounceTime(500),
         distinctUntilChanged(),
         switchMap((next: Game) => {
-          this.setGameValues(next);
-          this.socketService.getSocket().send(JSON.stringify({
-            type: 'updateGame',
-            joinKey: this.game.joinKey,
-            values: {
-              allowKnown: this.lobbyForm.get('allowKnown').value,
-              allowAsked: this.lobbyForm.get('allowAsked').value,
-              allowOriginal: this.lobbyForm.get('allowOriginal').value,
-              allowShaked: this.lobbyForm.get('allowShaked').value,
-              allowSetted: this.lobbyForm.get('allowSetted').value,
-              minBombTime: this.lobbyForm.get('minBombTime').value,
-              maxBombTime: this.lobbyForm.get('maxBombTime').value,
-              minPlayers: this.lobbyForm.get('minPlayers').value,
-              maxPlayers: this.lobbyForm.get('maxPlayers').value,
-              enableJoker: this.lobbyForm.get('enableJoker').value
-            }
-          }))
-          return this.gameService.updateGame(this.game.id, this.game);
+          return combineLatest([this.gameService.getGameFromStore(), this.userService.getPlayer()])
+            .pipe(
+              take(1),
+              switchMap(([gameConfig, playerConfig]: [AppConfig, AppConfig]) => {
+                if(playerConfig.player.resourceId === gameConfig.game.players[0].resourceId) {
+                  let copy = Object.assign({}, gameConfig.game);
+                  this.game = copy;
+                  GameComponent.setGameValues(copy, next)
+                  this.gameService.setGame(copy);
+                  this.gameService.sendGameUpdate(copy);
+                  return this.gameService.updateGame(copy.id, copy);
+                }
+                return EMPTY;
+              })
+            )
         })
       )
-      .subscribe((game: Game) => {
-        this.setGameValues(game);
-      })
+      .subscribe()
   }
 
-  private getPlayer(): void {
-    this.userService.getPlayer()
-      .pipe(
-        take(1)
-      )
-      .subscribe((appConfig: AppConfig) => {
-        if(appConfig) {
-          this.player = appConfig.player;
-        }
-      })
+  private static setGameValues(oldGame: Game, newGame: Game): void {
+    oldGame.allowKnown = newGame.allowKnown;
+    oldGame.allowAsked = newGame.allowAsked;
+    oldGame.allowOriginal = newGame.allowOriginal;
+    oldGame.allowShaked = newGame.allowShaked;
+    oldGame.minBombTime = newGame.minBombTime;
+    oldGame.maxBombTime = newGame.maxBombTime;
+    oldGame.allowSetted = newGame.allowSetted;
+    oldGame.minPlayers = newGame.minPlayers;
+    oldGame.maxPlayers = newGame.maxPlayers;
+    oldGame.enableJoker = newGame.enableJoker;
   }
 
-  private setGameValues(newGame: Game): void {
-    this.game.allowKnown = newGame.allowKnown;
-    this.game.allowAsked = newGame.allowAsked,
-    this.game.allowOriginal = newGame.allowOriginal,
-    this.game.allowShaked = newGame.allowShaked,
-    this.game.minBombTime = newGame.minBombTime,
-    this.game.maxBombTime = newGame.maxBombTime,
-    this.game.allowSetted = newGame.allowSetted,
-    this.game.minPlayers = newGame.minPlayers,
-    this.game.maxPlayers = newGame.maxPlayers,
-    this.game.enableJoker = newGame.enableJoker
+  private updateLobbyForm(game: Game) {
+    this.lobbyForm.get('allowKnown').setValue(game.allowKnown, { emitEvent: false });
+    this.lobbyForm.get('allowAsked').setValue(game.allowAsked, { emitEvent: false });
+    this.lobbyForm.get('allowOriginal').setValue(game.allowOriginal, { emitEvent: false });
+    this.lobbyForm.get('allowShaked').setValue(game.allowShaked, { emitEvent: false });
+    this.lobbyForm.get('allowSetted').setValue(game.allowSetted, { emitEvent: false });
+    this.lobbyForm.get('minBombTime').setValue(game.minBombTime, { emitEvent: false });
+    this.lobbyForm.get('maxBombTime').setValue(game.maxBombTime, { emitEvent: false });
+    this.lobbyForm.get('minPlayers').setValue(game.minPlayers, { emitEvent: false });
+    this.lobbyForm.get('maxPlayers').setValue(game.maxPlayers, { emitEvent: false });
+    this.lobbyForm.get('enableJoker').setValue(game.enableJoker, { emitEvent: false });
   }
 }

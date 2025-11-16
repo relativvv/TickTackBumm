@@ -1,13 +1,11 @@
 <div class="container">
   <app-game-area
     class="container--game-area"
-    [game]="game"
-    [player]="player"
+    [gameAreaForm]="gameAreaForm"
     (doTurnEvent)="doTurn()"
   ></app-game-area>
   <app-chat
     class="container--chat"
-    [game]="game"
-    [player]="player"
+    [messages]="messages"
   ></app-chat>
 </div>

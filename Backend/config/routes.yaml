@@ -14,6 +14,14 @@ verify_password:
   methods: GET
 
 update_game:
-    path: /game/{id}
-    controller: App\Controller\GameController::updateGame
-    methods: PUT
+  path: /game/{id}
+  controller: App\Controller\GameController::updateGame
+  methods: PUT
+
+###########################################################################
+
+get_random_card:
+  path: /card
+  controller: App\Controller\CardController::getCard
+  methods: GET
+

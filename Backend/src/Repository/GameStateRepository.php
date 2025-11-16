@@ -8,9 +8,6 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<GameState>
- */
 class GameStateRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)

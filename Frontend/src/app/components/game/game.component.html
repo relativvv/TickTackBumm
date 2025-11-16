@@ -2,14 +2,17 @@
   <ng-container [ngSwitch]="game.gameState.id">
     <app-lobby
       *ngSwitchCase="LOBBY"
-      [game]="game"
-      [player]="player"
       [form]="lobbyForm"
+      [timer]="timer"
+      [removeComponent]="removeComponent"
+      [startTriggered]="startTriggered"
+      [singleState]="singleState"
+      (gameStarter)="startGame()"
     ></app-lobby>
     <app-ingame
       *ngSwitchCase="INGAME"
-      [game]="game"
-      [player]="player"
+      [messages]="messages"
+      [gameAreaForm]="gameAreaForm"
     ></app-ingame>
   </ng-container>
 </ng-container>

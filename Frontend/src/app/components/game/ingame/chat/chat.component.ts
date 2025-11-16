@@ -1,11 +1,12 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {SocketService} from "../../../../../services/socket.service";
 import {UserService} from "../../../../../services/user.service";
-import {Player} from "../../../../../models/player.model";
-import {take} from "rxjs/operators";
-import {AppConfig} from "../../../../../models/appconfig.model";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {Game, Message} from "../../../../../models/game.model";
+import {Player} from "../../../../../models/player.model";
+import {GameService} from "../../../../../services/game.service";
+import {combineLatest} from "rxjs";
+import {AppConfig} from "../../../../../models/appconfig.model";
 
 @Component({
   selector: 'app-chat',
@@ -14,21 +15,29 @@ import {Game, Message} from "../../../../../models/game.model";
 })
 export class ChatComponent implements OnInit {
 
-  @Input() game: Game;
-  @Input() player: Player;
+  @Input() messages: Message[];
 
-  messages: Message[] = [];
   form: FormGroup;
+  game: Game;
+  player: Player;
 
   constructor(
     private readonly socketService: SocketService,
     private readonly usersService: UserService,
-    private readonly formBuilder: FormBuilder
+    private readonly formBuilder: FormBuilder,
+    private readonly gameService: GameService
   ) { }
 
   ngOnInit(): void {
+    combineLatest([
+      this.gameService.getGameFromStore(),
+      this.usersService.getPlayer()
+    ])
+      .subscribe(([game, player]: [AppConfig, AppConfig]) => {
+        this.game = game.game;
+        this.player = player.player;
+    });
     this.createForm();
-    this.startReceiving();
   }
 
   sendMessage(): void {
@@ -60,17 +69,8 @@ export class ChatComponent implements OnInit {
     this.form.get('message').patchValue('');
   }
 
-  private startReceiving(): void {
-    this.socketService.getSocket().onmessage = (e) => {
-      const json = JSON.parse(e.data);
-      if(json.type === 'receiveMessage') {
-        const messageItem: Message = {
-          message: json.message,
-          sender: json.player
-        }
-        this.messages.push(messageItem);
-      }
-    }
+  isPlayerAlive(): boolean {
+    return this.game.players.filter((player: Player) => player.resourceId === this.player.resourceId).length > 0;
   }
 
   private createForm(): void {

@@ -1,8 +1,11 @@
-import {AfterContentInit, Component, Input, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Player} from "../../../../../models/player.model";
 import {MatDialog} from "@angular/material/dialog";
 import {PlayerDetailsComponent} from "../../modals/player-details/player-details.component";
 import {animate, style, transition, trigger} from "@angular/animations";
+import {Game} from "../../../../../models/game.model";
+import {GameService} from "../../../../../services/game.service";
+import {AppConfig} from "../../../../../models/appconfig.model";
 
 @Component({
   selector: 'app-player-order',
@@ -18,48 +21,27 @@ import {animate, style, transition, trigger} from "@angular/animations";
         style({ top: 0, opacity: 1 }),
         animate('300ms', style({ opacity: 0, top: 15 }))
       ]),
-    ]),
+    ])
   ],
 })
-export class PlayerOrderComponent implements OnInit, AfterContentInit {
+export class PlayerOrderComponent implements OnInit {
 
-  @Input() players: Player[];
-
-  red: number;
-  green: number;
-  blue: number;
-  textColor: string;
+  game: Game;
 
   constructor(
-    private readonly matDialogService: MatDialog
+    private readonly matDialogService: MatDialog,
+    private readonly gameService: GameService
   ) { }
 
   ngOnInit(): void {
-  }
-
-  ngAfterContentInit(): void {
-    this.textColor = this.getTextColor();
+    this.gameService.getGameFromStore()
+      .subscribe((gameConfig: AppConfig) => {
+        this.game = gameConfig.game;
+      })
   }
 
   getRandomColorByName(name: string): string {
-    let hash = 0
-
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-      hash = hash & hash;
-    }
-
-    let rgb = [0, 0, 0];
-    for (let i = 0; i < 3; i++) {
-      rgb[i] = (hash >> (i * 8)) & 255;
-    }
-
-    this.red = rgb[0];
-    this.green = rgb[1];
-    this.blue = rgb[2];
-
-    this.textColor = this.getTextColor();
-
+    const rgb = PlayerOrderComponent.getRGBByName(name);
     return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
   }
 
@@ -72,11 +54,29 @@ export class PlayerOrderComponent implements OnInit, AfterContentInit {
     });
   }
 
-  private getTextColor(): string {
-    if ((this.red*0.299 + this.green*0.587 + this.blue*0.114) > 186) {
+  getTextColor(name: string): string {
+    const rgb = PlayerOrderComponent.getRGBByName(name);
+
+    if ((rgb[0]*0.299 + rgb[1]*0.587 + rgb[2]*0.114) > 186) {
       return '#000000';
     }
     return '#ffffff';
+  }
+
+  private static getRGBByName(name: string): number[] {
+    let hash = 0
+
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      hash = hash & hash;
+    }
+
+    let rgb = [0, 0, 0];
+    for (let i = 0; i < 3; i++) {
+      rgb[i] = (hash >> (i * 8)) & 255;
+    }
+
+    return [rgb[0], rgb[1], rgb[2]];
   }
 
 }

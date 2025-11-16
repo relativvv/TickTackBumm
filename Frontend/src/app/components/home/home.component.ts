@@ -110,6 +110,7 @@ export class HomeComponent implements OnInit {
             let player: Player = payload.player;
             player.resourceId = this.socketService.playerResourceId;
             this.userService.setPlayer(player);
+            this.gameService.setGame(game);
 
             this.socketService.getSocket().send(JSON.stringify(payload));
             this.router.navigate(['/game'], { queryParams: { key: game.joinKey } });

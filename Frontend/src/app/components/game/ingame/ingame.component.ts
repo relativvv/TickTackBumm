@@ -1,9 +1,15 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Game} from "../../../../models/game.model";
+import {Game, Message} from "../../../../models/game.model";
 import {Player} from "../../../../models/player.model";
 import {SocketService} from "../../../../services/socket.service";
 import {Router} from "@angular/router";
 import {ToastrService} from "ngx-toastr";
+import {GameService} from "../../../../services/game.service";
+import {FormGroup} from "@angular/forms";
+import {combineLatest} from "rxjs";
+import {UserService} from "../../../../services/user.service";
+import {AppConfig} from "../../../../models/appconfig.model";
+import {take} from "rxjs/operators";
 
 @Component({
   selector: 'app-ingame',
@@ -12,43 +18,24 @@ import {ToastrService} from "ngx-toastr";
 })
 export class IngameComponent implements OnInit {
 
-  @Input() game: Game;
-  @Input() player: Player
+  @Input() messages: Message[] = [];
+  @Input() gameAreaForm: FormGroup;
 
   constructor(
-    private readonly socketService: SocketService,
-    private readonly router: Router,
-    private readonly toastrService: ToastrService
-  ) { }
+    private readonly gameService: GameService,
+  ) {
+  }
 
   ngOnInit(): void {
-    if(!this.game || !this.player) {
-      this.router.navigate(['/']);
-      this.toastrService.error('Die Runde ist beendet..')
-    }
-
-    this.listenToSocket();
-    this.game.currentPlayer = this.game.players[0];
   }
 
   doTurn(): void {
-    const toShift = this.game.players.shift();
-    this.game.currentPlayer = null;
-
-    setTimeout(() => {
-      this.game.players.push(toShift);
-      this.game.currentPlayer = this.game.players[0];
-    }, 300)
+    this.gameService.getGameFromStore()
+      .pipe(
+        take(1)
+      )
+      .subscribe((gameConfig: AppConfig) => {
+        this.gameService.doTurn(gameConfig.game);
+      });
   }
-
-  private listenToSocket(): void {
-    this.socketService.getSocket().onmessage = (e) => {
-      const json = JSON.parse(e.data);
-
-      switch(json.type) {
-
-      }
-    }
-  }
-
 }

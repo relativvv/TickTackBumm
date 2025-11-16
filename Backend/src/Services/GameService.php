@@ -29,7 +29,7 @@ class GameService
 
     public function getGameById(int $id): Game
     {
-        return $this->gameRepository->findGameByid($id);
+        return $this->gameRepository->findGameById($id);
     }
 
     public function mergeGame(Game $game, Game $newGame): Game
@@ -50,6 +50,10 @@ class GameService
         $game->setGameState($gameState);
 
         return $this->gameRepository->updateGame($game);
+    }
+
+    public function getAllInactiveGames(): array {
+        return $this->gameRepository->findAllInactiveGames();
     }
 
     /**
